@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baum Festival Stage Organizer</title>
+<style>
+/* ====================== TEMA / VARIABLES ====================== */
+:root{
+  --bg:#f6f6f8; --panel:#ffffff; --text:#1b1b20; --muted:#85858f;
+  --border:#e5e5ea; --cell:#fbfbfc; --cell-alt:#f4f4f6;
+  --hover:#eef0ff; --accent:#5b62e0; --shadow:rgba(0,0,0,.06);
+}
+:root[data-theme=dark]{
+  --bg:#16161a; --panel:#1f1f25; --text:#ececf0; --muted:#8a8a95;
+  --border:#2e2e37; --cell:#26262e; --cell-alt:#22222a;
+  --hover:#2c3050; --accent:#7c84f0; --shadow:rgba(0,0,0,.4);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=light]){
+    --bg:#16161a; --panel:#1f1f25; --text:#ececf0; --muted:#8a8a95;
+    --border:#2e2e37; --cell:#26262e; --cell-alt:#22222a;
+    --hover:#2c3050; --accent:#7c84f0; --shadow:rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--text);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+button{font-family:inherit;cursor:pointer;}
+
+/* ====================== HEADER ====================== */
+header{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:10px 16px;border-bottom:1px solid var(--border);
+  background:var(--panel);
+}
+.brand{display:flex;flex-direction:column;line-height:1.2;}
+.brand b{font-size:15px;}
+.brand small{font-size:11px;color:var(--muted);}
+.tabs{display:flex;gap:4px;background:var(--cell-alt);padding:3px;border-radius:9px;}
+.day-tab{
+  border:0;background:transparent;color:var(--muted);
+  padding:6px 14px;border-radius:7px;font-size:13px;font-weight:600;
+}
+.day-tab.active{background:var(--panel);color:var(--text);box-shadow:0 1px 3px var(--shadow);}
+.toolbar{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;align-items:center;}
+.tbtn{
+  border:1px solid var(--border);background:var(--panel);color:var(--text);
+  padding:6px 11px;border-radius:7px;font-size:12px;font-weight:500;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.tbtn:hover{background:var(--hover);}
+.tbtn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.tbtn.primary:hover{filter:brightness(1.08);}
+#dirtyDot{font-size:11px;color:#e8a23c;font-weight:600;display:none;}
+
+/* ====================== LAYOUT ====================== */
+main{flex:1;display:flex;min-height:0;}
+aside{
+  width:248px;flex-shrink:0;border-right:1px solid var(--border);
+  background:var(--panel);display:flex;flex-direction:column;min-height:0;
+}
+body.panel-hidden aside{display:none;}
+.panel-top{padding:12px;border-bottom:1px solid var(--border);}
+#search{
+  width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;
+  background:var(--cell);color:var(--text);font-size:13px;margin-bottom:8px;
+}
+.panel-actions{display:flex;flex-wrap:wrap;gap:6px;}
+.panel-actions .tbtn{flex:1;justify-content:center;min-width:104px;}
+.pool-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 12px;font-size:12px;color:var(--muted);font-weight:600;
+}
+#poolCount{
+  background:var(--accent);color:#fff;border-radius:20px;
+  padding:1px 8px;font-size:11px;
+}
+.pool-wrap{flex:1;overflow-y:auto;padding:0 12px 16px;}
+.pool-wrap.drop-hover{background:var(--hover);}
+.pool-group{margin-bottom:14px;}
+.pool-label{
+  font-size:10.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:6px;opacity:.85;
+}
+.empty-pool{font-size:12px;color:var(--muted);text-align:center;padding:24px 8px;}
+.hint{font-size:11px;color:var(--muted);padding:10px 12px;line-height:1.5;border-top:1px solid var(--border);}
+
+/* ====================== CHIPS ====================== */
+.chip{
+  position:relative;display:flex;align-items:center;gap:6px;
+  border:1px solid var(--border);border-left:3px solid #888;
+  border-radius:7px;padding:6px 8px;margin-bottom:5px;
+  font-size:12.5px;line-height:1.3;
+  cursor:grab;user-select:none;
+}
+.chip:hover{filter:brightness(1.04);}
+.chip.dragging{opacity:.4;}
+.chip.selected{outline:2px solid var(--accent);outline-offset:1px;}
+.chip-name{flex:1;word-break:break-word;}
+.chip-del{
+  border:0;background:transparent;color:var(--muted);
+  font-size:12px;line-height:1;padding:2px 3px;border-radius:4px;
+  opacity:0;transition:opacity .12s;
+}
+.chip:hover .chip-del{opacity:1;}
+.chip-del:hover{background:rgba(220,60,60,.18);color:#e0483f;}
+@media (hover:none){.chip-del{opacity:.5;}}
+
+/* ====================== GRILLA ====================== */
+.grid-wrap{flex:1;overflow:auto;padding:14px;}
+.grid{display:grid;gap:0;min-width:760px;}
+.g-corner,.g-head,.g-time,.g-cell{border:1px solid var(--border);}
+.g-corner{
+  position:sticky;top:0;left:0;z-index:4;background:var(--panel);
+  border-top-left-radius:8px;
+}
+.g-head{
+  position:sticky;top:0;z-index:3;
+  padding:11px 8px;text-align:center;font-weight:700;font-size:13px;
+  border-top:3px solid #888;
+}
+.g-time{
+  position:sticky;left:0;z-index:2;background:var(--cell-alt);
+  display:flex;align-items:flex-start;justify-content:center;text-align:center;
+  padding:10px 4px 0;font-size:11px;font-weight:600;line-height:1.45;color:var(--muted);
+}
+.g-cell{
+  background:var(--cell);min-height:62px;padding:6px;
+  display:flex;flex-direction:column;
+}
+.g-cell.drop-hover{background:var(--hover);outline:2px dashed var(--accent);outline-offset:-3px;}
+.pool-wrap.drop-hover{outline:2px dashed var(--accent);outline-offset:-4px;border-radius:8px;}
+.g-cell .chip{cursor:grab;}
+
+/* ====================== IMPRESIÓN ====================== */
+@media print{
+  header,aside,.hint{display:none!important;}
+  body,main{display:block;overflow:visible;}
+  .grid-wrap{overflow:visible;padding:0;}
+  .chip-del{display:none;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <b>🎛️ Baum Festival Stage Organizer</b>
+    <small>Baum 11 · Corferias, Bogotá · 22–23 mayo 2026</small>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="day-tab" data-day="22">Vie 22 mayo</button>
+    <button class="day-tab" data-day="23">Sáb 23 mayo</button>
+  </div>
+
+  <div class="toolbar">
+    <span id="dirtyDot">● sin exportar</span>
+    <button class="tbtn" id="themeBtn" title="Tema claro/oscuro">🌓 Tema</button>
+    <button class="tbtn" id="panelBtn" title="Ocultar/mostrar panel">⬅ Panel</button>
+    <button class="tbtn" id="importBtn">⬆ Importar</button>
+    <button class="tbtn" id="exportBtn">⬇ Exportar JSON</button>
+    <button class="tbtn primary" id="shareBtn">📷 Compartir imagen</button>
+    <input type="file" id="fileInput" accept="application/json" hidden>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <div class="panel-top">
+      <input type="text" id="search" placeholder="Buscar artista…">
+      <div class="panel-actions">
+        <button class="tbtn" id="addBtn">＋ Añadir</button>
+        <button class="tbtn" id="clearBtn">↩ Vaciar grilla</button>
+        <button class="tbtn" id="resetBtn">⟳ Reiniciar</button>
+      </div>
+    </div>
+    <div class="pool-meta">
+      <span>Sin asignar</span><span id="poolCount">0</span>
+    </div>
+    <div class="pool-wrap" id="poolWrap">
+      <div id="pool"></div>
+    </div>
+    <div class="hint">
+      Arrastra los artistas a la grilla, o <b>toca un artista</b> para seleccionarlo
+      y luego toca la celda destino. Toca un espacio vacío del panel para devolverlo.
+    </div>
+  </aside>
+
+  <section class="grid-wrap">
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<script>
+/* ============================================================
+   1. ESTADO Y DATOS
+   ============================================================ */
+const STAGES=[
+  {id:'stamm',       name:'Stamm',        color:'#e85a93'},
+  {id:'paramo',      name:'Páramo',       color:'#36a96a'},
+  {id:'ra',          name:'RA',           color:'#ef7e54'},
+  {id:'todalanoche', name:'todalanoche',  color:'#8b6cf0'},
+  {id:'pendiente',   name:'(PENDIENTE)',  color:'#3aa6c9'}
+];
+const STAGE_BY_ID=Object.fromEntries(STAGES.map(s=>[s.id,s]));
+// Bloques de 1:30 h, de 15:00 a 03:00 (key = identificador estable, label = lo que se ve)
+const TIMES=[
+  {key:'15:00',label:'15:00 – 16:30'},
+  {key:'16:30',label:'16:30 – 18:00'},
+  {key:'18:00',label:'18:00 – 19:30'},
+  {key:'19:30',label:'19:30 – 21:00'},
+  {key:'21:00',label:'21:00 – 22:30'},
+  {key:'22:30',label:'22:30 – 00:00'},
+  {key:'00:00',label:'00:00 – 01:30'},
+  {key:'01:30',label:'01:30 – 03:00'}
+];
+
+// Lineup original por día y escenario
+const INITIAL={
+  '22':{
+    stamm:['Cassian','Disclosure (DJ Set)','Joseph Capriati','Pablo Romero','Richie Hawtin'],
+    paramo:['Alba Franch B2B Helena Lauwaert','DJ Cringey','Emilija','MALUGI','ØTTA','Pegassi','Supergloss','Younglolo'],
+    ra:['Adiel B2B Quest','Boys Noize','Estella Boersma','Helena Hauff','ISAbella','Loumie','Lovefoxy'],
+    todalanoche:['BIIA','Cera Khin','Johannes Schuster','KUKO','LESSSS','Onlynumbers','Praxys (Live)'],
+    pendiente:[]
+  },
+  '23':{
+    stamm:['Elderbrook (DJ Set)','Emilio Mustafá','Felipe Gordon','Nina Kraviz','PAN-POT','Underworld (Live)'],
+    paramo:['Agoria','Avalon Emerson','Brenda','Mall Grab','Nick León','Nicola Cruz','Nyksan','Paul Oakenfold'],
+    ra:['Alarico B2B Yanamaste','ANNĒ B2B SHDW','DJ Rush','EV-1','Philippa Pacho','Planetary Assault Systems (Live)','Thelma','ÜBERKIKZ B2B Felicie'],
+    todalanoche:['Adrián Mills F2F Serafina','Davyboi F2F Parfait','Florian Picasso F2F Alex Nantaya','Franck F2F Fenrick','KUKO F2F Johannes Schuster','Mija F2F Ollie Lishman','Øslo F2F DJ Kinner','SAI F2F NORO$T'],
+    pendiente:[]
+  }
+};
+
+let uid=0;
+// Construye el estado original: cada artista tiene escenario de origen y slot (null = sin asignar)
+function buildInitial(){
+  const out={};
+  for(const day of ['22','23']){
+    out[day]=[];
+    for(const s of STAGES)
+      for(const name of INITIAL[day][s.id])
+        out[day].push({id:'a'+(uid++),name,stage:s.id,slot:null});
+  }
+  return out;
+}
+
+const LS_KEY='baum-lineup-v1';
+let state={day:'22',lineup:buildInitial()};
+let dirty=false;        // hay cambios desde la última exportación
+let selectedId=null;    // artista seleccionado por toque (fallback táctil)
+
+/* ============================================================
+   2. PERSISTENCIA (localStorage)
+   ============================================================ */
+function save(){
+  localStorage.setItem(LS_KEY,JSON.stringify({day:state.day,lineup:state.lineup}));
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw)return;
+    const obj=JSON.parse(raw);
+    if(obj&&obj.lineup&&Array.isArray(obj.lineup['22'])&&Array.isArray(obj.lineup['23'])){
+      state.lineup=obj.lineup;
+      state.day=(obj.day==='23')?'23':'22';
+      // migración: artistas con horario antiguo (que ya no existe) vuelven al panel
+      const validTimes=new Set(TIMES.map(t=>t.key));
+      for(const d of ['22','23'])
+        for(const a of state.lineup[d])
+          if(a.slot&&!validTimes.has(a.slot.time))a.slot=null;
+      // mantiene el contador de ids por encima de los existentes
+      let max=0;
+      for(const d of ['22','23'])
+        for(const a of state.lineup[d]){
+          const n=parseInt(String(a.id).replace(/\D/g,''),10);
+          if(!isNaN(n)&&n>max)max=n;
+        }
+      uid=max+1;
+    }
+  }catch(e){/* estado corrupto: se ignora */}
+}
+
+/* ============================================================
+   3. HELPERS
+   ============================================================ */
+function curList(){return state.lineup[state.day];}
+function findArtist(id){
+  for(const d of ['22','23']){
+    const a=state.lineup[d].find(x=>x.id===id);
+    if(a)return a;
+  }
+  return null;
+}
+function artistsInCell(stageId,time){
+  return curList().filter(a=>a.slot&&a.slot.stage===stageId&&a.slot.time===time);
+}
+function hexToRgba(hex,alpha){
+  const h=hex.replace('#','');
+  const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+function clearHovers(){
+  document.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));
+}
+
+/* ============================================================
+   4. MUTACIONES DE ESTADO
+   ============================================================ */
+function moveArtist(id,slot){
+  const a=findArtist(id);
+  if(!a)return;
+  a.slot=slot;          // slot=null -> vuelve al panel, conserva su escenario de origen
+  dirty=true;
+  render();
+}
+function deleteArtist(id){
+  for(const d of ['22','23']){
+    const i=state.lineup[d].findIndex(x=>x.id===id);
+    if(i>=0){state.lineup[d].splice(i,1);break;}
+  }
+  if(selectedId===id)selectedId=null;
+  dirty=true;render();
+}
+function addArtist(){
+  const name=prompt('Nombre del artista:');
+  if(!name||!name.trim())return;
+  const choice=prompt('Escenario:\n  1 = Stamm\n  2 = Páramo\n  3 = RA\n  4 = todalanoche\n  5 = (PENDIENTE)','1');
+  const map={'1':'stamm','2':'paramo','3':'ra','4':'todalanoche','5':'pendiente'};
+  const stage=map[(choice||'').trim()];
+  if(!stage){alert('Escenario no válido.');return;}
+  curList().push({id:'a'+(uid++),name:name.trim(),stage,slot:null});
+  dirty=true;render();
+}
+function clearGrid(){
+  curList().forEach(a=>a.slot=null);
+  dirty=true;render();
+}
+function resetAll(){
+  if(!confirm('¿Restaurar el lineup original de ambos días? Se perderán todos los cambios.'))return;
+  state.lineup=buildInitial();
+  selectedId=null;dirty=true;render();
+}
+
+/* ============================================================
+   5. RENDER
+   ============================================================ */
+const poolEl=document.getElementById('pool');
+const poolWrap=document.getElementById('poolWrap');
+const poolCountEl=document.getElementById('poolCount');
+const gridEl=document.getElementById('grid');
+const searchEl=document.getElementById('search');
+const dirtyDot=document.getElementById('dirtyDot');
+
+function render(){
+  document.querySelectorAll('.day-tab').forEach(b=>
+    b.classList.toggle('active',b.dataset.day===state.day));
+  renderPool();
+  renderGrid();
+  dirtyDot.style.display=dirty?'inline-block':'none';
+  save();
+}
+
+// --- Crea un chip de artista (usado en panel y en grilla) ---
+function makeChip(a){
+  const s=STAGE_BY_ID[a.stage]||STAGES[0];
+  const chip=document.createElement('div');
+  chip.className='chip'+(a.id===selectedId?' selected':'');
+  chip.draggable=true;
+  chip.dataset.id=a.id;
+  chip.style.borderLeftColor=s.color;
+  chip.style.background=hexToRgba(s.color,.22);
+
+  const name=document.createElement('span');
+  name.className='chip-name';
+  name.textContent=a.name;
+
+  const del=document.createElement('button');
+  del.className='chip-del';
+  del.textContent='✕';
+  del.title='Eliminar artista';
+
+  chip.append(name,del);
+
+  chip.addEventListener('dragstart',e=>{
+    e.dataTransfer.setData('text/plain',a.id);
+    e.dataTransfer.effectAllowed='move';
+    chip.classList.add('dragging');
+  });
+  chip.addEventListener('dragend',()=>{chip.classList.remove('dragging');clearHovers();});
+  chip.addEventListener('click',e=>{
+    if(e.target===del)return;
+    selectedId=(selectedId===a.id)?null:a.id;   // selección por toque
+    render();
+  });
+  del.addEventListener('click',e=>{
+    e.stopPropagation();
+    deleteArtist(a.id);
+  });
+  return chip;
+}
+
+// --- Panel "Sin asignar", agrupado por escenario ---
+function renderPool(){
+  const q=searchEl.value.trim().toLowerCase();
+  poolEl.innerHTML='';
+  let total=0;
+  for(const s of STAGES){
+    const items=curList().filter(a=>!a.slot&&a.stage===s.id);
+    total+=items.length;
+    const shown=items.filter(a=>a.name.toLowerCase().includes(q));
+    if(!shown.length)continue;
+    const group=document.createElement('div');
+    group.className='pool-group';
+    const label=document.createElement('div');
+    label.className='pool-label';
+    label.textContent=s.name;
+    label.style.color=s.color;
+    group.appendChild(label);
+    shown.forEach(a=>group.appendChild(makeChip(a)));
+    poolEl.appendChild(group);
+  }
+  poolCountEl.textContent=total;
+  if(!poolEl.children.length){
+    const msg=q?'Sin resultados para la búsqueda.':'Todos los artistas están en la grilla 🎉';
+    poolEl.innerHTML='<div class="empty-pool">'+msg+'</div>';
+  }
+}
+
+// --- Grilla principal: escenarios × horarios ---
+function renderGrid(){
+  gridEl.innerHTML='';
+  gridEl.style.gridTemplateColumns=`92px repeat(${STAGES.length},minmax(170px,1fr))`;
+
+  const corner=document.createElement('div');
+  corner.className='g-corner';
+  gridEl.appendChild(corner);
+
+  for(const s of STAGES){
+    const h=document.createElement('div');
+    h.className='g-head';
+    h.textContent=s.name;
+    h.style.color=s.color;
+    h.style.borderTopColor=s.color;
+    h.style.background=hexToRgba(s.color,.14);
+    gridEl.appendChild(h);
+  }
+
+  for(const t of TIMES){
+    const tc=document.createElement('div');
+    tc.className='g-time';
+    tc.textContent=t.label;
+    gridEl.appendChild(tc);
+
+    for(const s of STAGES){
+      const cell=document.createElement('div');
+      cell.className='g-cell';
+      cell.dataset.stage=s.id;cell.dataset.time=t.key;
+      artistsInCell(s.id,t.key).forEach(a=>cell.appendChild(makeChip(a)));
+      attachDrop(cell,()=>({stage:s.id,time:t.key}));
+      gridEl.appendChild(cell);
+    }
+  }
+}
+
+/* ============================================================
+   6. DRAG & DROP  (+ fallback de toque)
+   ============================================================ */
+function attachDrop(el,slotFn){
+  el.addEventListener('dragover',e=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    el.classList.add('drop-hover');
+  });
+  el.addEventListener('dragleave',e=>{
+    if(!el.contains(e.relatedTarget))el.classList.remove('drop-hover');
+  });
+  el.addEventListener('drop',e=>{
+    e.preventDefault();
+    el.classList.remove('drop-hover');
+    const id=e.dataTransfer.getData('text/plain');
+    if(id)moveArtist(id,slotFn());
+  });
+  // Fallback táctil: con un artista seleccionado, tocar el destino lo coloca
+  el.addEventListener('click',e=>{
+    if(!selectedId)return;
+    if(e.target.closest('.chip'))return;   // tocar otro chip = seleccionarlo
+    moveArtist(selectedId,slotFn());
+    selectedId=null;
+  });
+}
+// El panel entero es zona de drop -> devuelve al pool (slot null)
+attachDrop(poolWrap,()=>null);
+document.addEventListener('dragend',clearHovers);
+
+/* ============================================================
+   7. EXPORTAR / IMPORTAR
+   ============================================================ */
+function downloadBlob(blob,name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+function exportJSON(){
+  const data={festival:'Baum Festival 11',exportedAt:new Date().toISOString(),lineup:state.lineup};
+  downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'baum-lineup.json');
+  dirty=false;render();
+}
+function importJSON(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const obj=JSON.parse(reader.result);
+      if(obj&&obj.lineup&&Array.isArray(obj.lineup['22'])&&Array.isArray(obj.lineup['23'])){
+        state.lineup=obj.lineup;
+        selectedId=null;dirty=true;render();
+      }else alert('El archivo no tiene un formato válido.');
+    }catch(e){alert('No se pudo leer el archivo JSON.');}
+  };
+  reader.readAsText(file);
+}
+
+/* ============================================================
+   8. COMPARTIR: genera una imagen PNG de la grilla
+   ============================================================ */
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+// Divide un texto en máximo 2 líneas según el ancho disponible
+function wrapText(ctx,text,maxW){
+  const words=text.split(' ');
+  const lines=[];let line='';
+  for(const w of words){
+    const test=line?line+' '+w:w;
+    if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}
+    else line=test;
+  }
+  if(line)lines.push(line);
+  if(lines.length>2){
+    lines.length=2;
+    let l=lines[1];
+    while(l.length&&ctx.measureText(l+'…').width>maxW)l=l.slice(0,-1);
+    lines[1]=l+'…';
+  }
+  return lines;
+}
+async function shareImage(){
+  const day=state.day;
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  const SCALE=2;
+  const PAD=36,TITLE_H=80,HEAD_H=52,TIME_W=104,CELL_W=216;
+  const CELL_PAD=10,CHIP_PADV=7,LINE_H=17,CHIP_GAP=7;
+  const CHIP_FONT='13px -apple-system,Segoe UI,Roboto,sans-serif';
+  const innerW=CELL_W-CELL_PAD*2-16;
+
+  // 1. Mide y precalcula chips + altura de cada fila
+  ctx.font=CHIP_FONT;
+  const cellData={};const rowH=[];
+  for(const t of TIMES){
+    let maxH=46;
+    for(const s of STAGES){
+      const chips=artistsInCell(s.id,t.key).map(a=>{
+        const lines=wrapText(ctx,a.name,innerW);
+        return {lines,h:CHIP_PADV*2+lines.length*LINE_H,color:STAGE_BY_ID[s.id].color};
+      });
+      cellData[s.id+'|'+t.key]=chips;
+      let h=chips.length?CELL_PAD*2:46;
+      chips.forEach((c,i)=>h+=c.h+(i?CHIP_GAP:0));
+      if(h>maxH)maxH=h;
+    }
+    rowH.push(maxH);
+  }
+
+  // 2. Dimensiona el lienzo
+  const gridW=TIME_W+STAGES.length*CELL_W;
+  const W=PAD*2+gridW;
+  const H=PAD*2+TITLE_H+HEAD_H+rowH.reduce((a,b)=>a+b,0);
+  canvas.width=W*SCALE;canvas.height=H*SCALE;
+  ctx.scale(SCALE,SCALE);
+
+  // 3. Fondo y título
+  ctx.fillStyle='#16161a';ctx.fillRect(0,0,W,H);
+  ctx.textBaseline='alphabetic';ctx.textAlign='left';
+  ctx.fillStyle='#ffffff';
+  ctx.font='700 26px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('Baum Festival 11',PAD,PAD+30);
+  ctx.fillStyle='#8a8a95';
+  ctx.font='15px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText((day==='22'?'Viernes 22':'Sábado 23')+' de mayo · Corferias, Bogotá',PAD,PAD+55);
+
+  const gx=PAD,gy=PAD+TITLE_H;
+
+  // 4. Cabeceras de escenario
+  ctx.textBaseline='middle';
+  STAGES.forEach((s,i)=>{
+    const x=gx+TIME_W+i*CELL_W;
+    ctx.fillStyle=hexToRgba(s.color,.18);ctx.fillRect(x,gy,CELL_W,HEAD_H);
+    ctx.fillStyle=s.color;ctx.fillRect(x,gy,CELL_W,3);
+    ctx.font='700 15px -apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(s.name,x+CELL_W/2,gy+HEAD_H/2+2);
+  });
+
+  // 5. Filas: horario + celdas con chips
+  let y=gy+HEAD_H;
+  TIMES.forEach((t,ri)=>{
+    const h=rowH[ri];
+    ctx.fillStyle='#26262e';ctx.fillRect(gx,y,TIME_W,h);
+    ctx.fillStyle='#cfcfd6';ctx.font='600 12px -apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.textAlign='center';ctx.fillText(t.label,gx+TIME_W/2,y+19);
+
+    STAGES.forEach((s,ci)=>{
+      const x=gx+TIME_W+ci*CELL_W;
+      ctx.strokeStyle='#2e2e37';ctx.strokeRect(x+.5,y+.5,CELL_W,h);
+      let cy=y+CELL_PAD;
+      ctx.textAlign='left';
+      for(const c of cellData[s.id+'|'+t.key]){
+        roundRect(ctx,x+CELL_PAD,cy,CELL_W-CELL_PAD*2,c.h,7);
+        ctx.fillStyle=hexToRgba(c.color,.24);ctx.fill();
+        ctx.fillStyle=c.color;ctx.fillRect(x+CELL_PAD,cy,3,c.h);
+        ctx.fillStyle='#ececf0';ctx.font=CHIP_FONT;
+        c.lines.forEach((ln,li)=>
+          ctx.fillText(ln,x+CELL_PAD+12,cy+CHIP_PADV+LINE_H*li+LINE_H/2+1));
+        cy+=c.h+CHIP_GAP;
+      }
+    });
+    ctx.strokeStyle='#2e2e37';ctx.strokeRect(gx+.5,y+.5,TIME_W,h);
+    y+=h;
+  });
+
+  // 6. Pie
+  ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillStyle='#5a5a63';ctx.font='12px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('Armado con Baum Festival Stage Organizer',PAD,H-PAD+22);
+
+  // 7. Exporta: comparte si el navegador lo permite, si no descarga
+  canvas.toBlob(async blob=>{
+    const file=new File([blob],`baum-lineup-dia${day}.png`,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'Mi lineup · Baum 11'});return;}
+      catch(e){/* cancelado: cae a descarga */}
+    }
+    downloadBlob(blob,file.name);
+  },'image/png');
+}
+
+/* ============================================================
+   9. TEMA CLARO / OSCURO
+   ============================================================ */
+function initTheme(){
+  const saved=localStorage.getItem('baum-theme');
+  if(saved==='dark'||saved==='light')document.documentElement.dataset.theme=saved;
+}
+document.getElementById('themeBtn').onclick=()=>{
+  const sysDark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const cur=document.documentElement.dataset.theme||(sysDark?'dark':'light');
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.dataset.theme=next;
+  localStorage.setItem('baum-theme',next);
+};
+
+/* ============================================================
+   10. EVENTOS
+   ============================================================ */
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.day-tab');
+  if(!b)return;
+  state.day=b.dataset.day;selectedId=null;render();
+});
+searchEl.addEventListener('input',renderPool);
+document.getElementById('addBtn').onclick=addArtist;
+document.getElementById('clearBtn').onclick=clearGrid;
+document.getElementById('resetBtn').onclick=resetAll;
+document.getElementById('exportBtn').onclick=exportJSON;
+document.getElementById('shareBtn').onclick=shareImage;
+document.getElementById('panelBtn').onclick=()=>document.body.classList.toggle('panel-hidden');
+document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').addEventListener('change',e=>{
+  if(e.target.files[0])importJSON(e.target.files[0]);
+  e.target.value='';
+});
+// Atajo Ctrl/Cmd + S -> exportar JSON
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){
+    e.preventDefault();exportJSON();
+  }
+});
+
+/* ============================================================
+   11. ARRANQUE
+   ============================================================ */
+initTheme();
+loadState();
+render();
+</script>
+</body>
+</html>
