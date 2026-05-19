@@ -56,6 +56,7 @@ header{
 .tbtn:hover{background:var(--hover);}
 .tbtn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
 .tbtn.primary:hover{filter:brightness(1.08);}
+.tbtn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 #dirtyDot{font-size:11px;color:#e8a23c;font-weight:600;display:none;}
 
 /* ====================== LAYOUT ====================== */
@@ -130,12 +131,35 @@ body.panel-hidden aside{display:none;}
   padding:10px 4px 0;font-size:11px;font-weight:600;line-height:1.45;color:var(--muted);
 }
 .g-cell{
+  position:relative;
   background:var(--cell);min-height:62px;padding:6px;
   display:flex;flex-direction:column;
 }
 .g-cell.drop-hover{background:var(--hover);outline:2px dashed var(--accent);outline-offset:-3px;}
 .pool-wrap.drop-hover{outline:2px dashed var(--accent);outline-offset:-4px;border-radius:8px;}
 .g-cell .chip{cursor:grab;}
+
+/* ====================== RUTA DE BAILE ====================== */
+body.route-mode .g-cell{cursor:pointer;}
+body.route-mode .g-cell:hover{background:var(--hover);}
+body.route-mode .chip{cursor:pointer;}
+.g-cell.route-stop{box-shadow:inset 0 0 0 3px var(--stop-color);}
+.g-cell.route-stop::after{
+  content:"";position:absolute;inset:0;background:var(--stop-color);
+  opacity:.10;pointer-events:none;
+}
+.route-badge{
+  position:absolute;top:4px;right:4px;width:21px;height:21px;
+  border-radius:50%;color:#fff;font-size:11.5px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;z-index:2;
+  box-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+#routeBanner{
+  display:none;margin-bottom:12px;padding:9px 12px;border-radius:8px;
+  background:var(--hover);border:1px solid var(--accent);
+  font-size:12px;font-weight:600;color:var(--text);
+}
+body.route-mode #routeBanner{display:block;}
 
 /* ====================== IMPRESIÓN ====================== */
 @media print{
@@ -163,9 +187,11 @@ body.panel-hidden aside{display:none;}
     <span id="dirtyDot">● sin exportar</span>
     <button class="tbtn" id="themeBtn" title="Tema claro/oscuro">🌓 Tema</button>
     <button class="tbtn" id="panelBtn" title="Ocultar/mostrar panel">⬅ Panel</button>
+    <button class="tbtn" id="routeBtn" title="Marcar tu recorrido de la noche">🕒 Modo ruta</button>
     <button class="tbtn" id="importBtn">⬆ Importar</button>
-    <button class="tbtn" id="exportBtn">⬇ Exportar JSON</button>
-    <button class="tbtn primary" id="shareBtn">📷 Compartir imagen</button>
+    <button class="tbtn" id="exportBtn">⬇ JSON</button>
+    <button class="tbtn" id="shareBtn">📷 Grilla PNG</button>
+    <button class="tbtn primary" id="routeImgBtn">🗺️ Mi ruta PNG</button>
     <input type="file" id="fileInput" accept="application/json" hidden>
   </div>
 </header>
@@ -189,10 +215,13 @@ body.panel-hidden aside{display:none;}
     <div class="hint">
       Arrastra los artistas a la grilla, o <b>toca un artista</b> para seleccionarlo
       y luego toca la celda destino. Toca un espacio vacío del panel para devolverlo.
+      <br><br>Activa <b>🕒 Modo ruta</b> para trazar tu recorrido de la noche y
+      descargarlo con <b>🗺️ Mi ruta PNG</b>.
     </div>
   </aside>
 
   <section class="grid-wrap">
+    <div id="routeBanner">🕒 Modo ruta activo — toca celdas de la grilla para marcar tu recorrido. Se numeran en orden cronológico; toca de nuevo para quitar una parada.</div>
     <div class="grid" id="grid"></div>
   </section>
 </main>
@@ -253,15 +282,17 @@ function buildInitial(){
 }
 
 const LS_KEY='baum-lineup-v1';
-let state={day:'22',lineup:buildInitial()};
+// route: por día, un mapa { horario -> escenario } = tu recorrido de la noche
+let state={day:'22',lineup:buildInitial(),route:{'22':{},'23':{}}};
 let dirty=false;        // hay cambios desde la última exportación
 let selectedId=null;    // artista seleccionado por toque (fallback táctil)
+let routeMode=false;    // modo "ruta de baile": clic en celda = marcar parada
 
 /* ============================================================
    2. PERSISTENCIA (localStorage)
    ============================================================ */
 function save(){
-  localStorage.setItem(LS_KEY,JSON.stringify({day:state.day,lineup:state.lineup}));
+  localStorage.setItem(LS_KEY,JSON.stringify({day:state.day,lineup:state.lineup,route:state.route}));
 }
 function loadState(){
   try{
@@ -284,6 +315,12 @@ function loadState(){
           if(!isNaN(n)&&n>max)max=n;
         }
       uid=max+1;
+      // ruta de baile (puede no existir en archivos viejos)
+      if(obj.route&&typeof obj.route==='object')
+        state.route={'22':obj.route['22']||{},'23':obj.route['23']||{}};
+      for(const d of ['22','23'])
+        for(const tk of Object.keys(state.route[d]))
+          if(!validTimes.has(tk))delete state.route[d][tk];
     }
   }catch(e){/* estado corrupto: se ignora */}
 }
@@ -301,6 +338,10 @@ function findArtist(id){
 }
 function artistsInCell(stageId,time){
   return curList().filter(a=>a.slot&&a.slot.stage===stageId&&a.slot.time===time);
+}
+// Horarios marcados como ruta, en orden cronológico
+function routeTimes(day){
+  return TIMES.filter(t=>state.route[day]&&state.route[day][t.key]);
 }
 function hexToRgba(hex,alpha){
   const h=hex.replace('#','');
@@ -346,7 +387,15 @@ function clearGrid(){
 function resetAll(){
   if(!confirm('¿Restaurar el lineup original de ambos días? Se perderán todos los cambios.'))return;
   state.lineup=buildInitial();
+  state.route={'22':{},'23':{}};
   selectedId=null;dirty=true;render();
+}
+// Marca / mueve / quita una parada de la ruta (una sola por bloque de horario)
+function toggleRoute(stage,time){
+  const r=state.route[state.day];
+  if(r[time]===stage)delete r[time];   // mismo escenario -> quitar parada
+  else r[time]=stage;                  // marcar o mover la parada del bloque
+  dirty=true;render();
 }
 
 /* ============================================================
@@ -358,10 +407,14 @@ const poolCountEl=document.getElementById('poolCount');
 const gridEl=document.getElementById('grid');
 const searchEl=document.getElementById('search');
 const dirtyDot=document.getElementById('dirtyDot');
+const routeBtn=document.getElementById('routeBtn');
 
 function render(){
   document.querySelectorAll('.day-tab').forEach(b=>
     b.classList.toggle('active',b.dataset.day===state.day));
+  document.body.classList.toggle('route-mode',routeMode);
+  routeBtn.classList.toggle('active',routeMode);
+  routeBtn.textContent=routeMode?'🕒 Ruta: ON':'🕒 Modo ruta';
   renderPool();
   renderGrid();
   dirtyDot.style.display=dirty?'inline-block':'none';
@@ -373,7 +426,7 @@ function makeChip(a){
   const s=STAGE_BY_ID[a.stage]||STAGES[0];
   const chip=document.createElement('div');
   chip.className='chip'+(a.id===selectedId?' selected':'');
-  chip.draggable=true;
+  chip.draggable=!routeMode;
   chip.dataset.id=a.id;
   chip.style.borderLeftColor=s.color;
   chip.style.background=hexToRgba(s.color,.22);
@@ -397,6 +450,7 @@ function makeChip(a){
   chip.addEventListener('dragend',()=>{chip.classList.remove('dragging');clearHovers();});
   chip.addEventListener('click',e=>{
     if(e.target===del)return;
+    if(routeMode)return;            // en modo ruta el clic lo gestiona la celda
     selectedId=(selectedId===a.id)?null:a.id;   // selección por toque
     render();
   });
@@ -453,6 +507,10 @@ function renderGrid(){
     gridEl.appendChild(h);
   }
 
+  // numeración de las paradas de la ruta (orden cronológico)
+  const routeNum={};
+  routeTimes(state.day).forEach((t,i)=>routeNum[t.key]=i+1);
+
   for(const t of TIMES){
     const tc=document.createElement('div');
     tc.className='g-time';
@@ -464,6 +522,16 @@ function renderGrid(){
       cell.className='g-cell';
       cell.dataset.stage=s.id;cell.dataset.time=t.key;
       artistsInCell(s.id,t.key).forEach(a=>cell.appendChild(makeChip(a)));
+      // ¿es una parada de la ruta?
+      if(state.route[state.day][t.key]===s.id){
+        cell.classList.add('route-stop');
+        cell.style.setProperty('--stop-color',s.color);
+        const badge=document.createElement('div');
+        badge.className='route-badge';
+        badge.textContent=routeNum[t.key];
+        badge.style.background=s.color;
+        cell.appendChild(badge);
+      }
       attachDrop(cell,()=>({stage:s.id,time:t.key}));
       gridEl.appendChild(cell);
     }
@@ -488,11 +556,17 @@ function attachDrop(el,slotFn){
     const id=e.dataTransfer.getData('text/plain');
     if(id)moveArtist(id,slotFn());
   });
-  // Fallback táctil: con un artista seleccionado, tocar el destino lo coloca
   el.addEventListener('click',e=>{
+    const slot=slotFn();
+    // Modo ruta: clic en una celda de la grilla = marca/quita parada
+    if(routeMode){
+      if(slot)toggleRoute(slot.stage,slot.time);
+      return;
+    }
+    // Fallback táctil: con un artista seleccionado, tocar el destino lo coloca
     if(!selectedId)return;
     if(e.target.closest('.chip'))return;   // tocar otro chip = seleccionarlo
-    moveArtist(selectedId,slotFn());
+    moveArtist(selectedId,slot);
     selectedId=null;
   });
 }
@@ -511,7 +585,8 @@ function downloadBlob(blob,name){
   setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 function exportJSON(){
-  const data={festival:'Baum Festival 11',exportedAt:new Date().toISOString(),lineup:state.lineup};
+  const data={festival:'Baum Festival 11',exportedAt:new Date().toISOString(),
+              lineup:state.lineup,route:state.route};
   downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'baum-lineup.json');
   dirty=false;render();
 }
@@ -522,6 +597,8 @@ function importJSON(file){
       const obj=JSON.parse(reader.result);
       if(obj&&obj.lineup&&Array.isArray(obj.lineup['22'])&&Array.isArray(obj.lineup['23'])){
         state.lineup=obj.lineup;
+        state.route=(obj.route&&typeof obj.route==='object')
+          ?{'22':obj.route['22']||{},'23':obj.route['23']||{}}:{'22':{},'23':{}};
         selectedId=null;dirty=true;render();
       }else alert('El archivo no tiene un formato válido.');
     }catch(e){alert('No se pudo leer el archivo JSON.');}
@@ -559,8 +636,28 @@ function wrapText(ctx,text,maxW){
   }
   return lines;
 }
+// Igual que wrapText pero con un máximo de líneas configurable
+function wrapTextN(ctx,text,maxW,maxLines){
+  const words=text.split(' ');
+  const lines=[];let line='';
+  for(const w of words){
+    const test=line?line+' '+w:w;
+    if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}
+    else line=test;
+  }
+  if(line)lines.push(line);
+  if(lines.length>maxLines){
+    lines.length=maxLines;
+    let l=lines[maxLines-1];
+    while(l.length&&ctx.measureText(l+'…').width>maxW)l=l.slice(0,-1);
+    lines[maxLines-1]=l+'…';
+  }
+  return lines;
+}
 async function shareImage(){
   const day=state.day;
+  const routeNum={};
+  routeTimes(day).forEach((t,i)=>routeNum[t.key]=i+1);
   const canvas=document.createElement('canvas');
   const ctx=canvas.getContext('2d');
   const SCALE=2;
@@ -639,6 +736,20 @@ async function shareImage(){
           ctx.fillText(ln,x+CELL_PAD+12,cy+CHIP_PADV+LINE_H*li+LINE_H/2+1));
         cy+=c.h+CHIP_GAP;
       }
+      // resalta la parada de la ruta con su número
+      if(state.route[day][t.key]===s.id){
+        const col=STAGE_BY_ID[s.id].color;
+        ctx.lineWidth=3;ctx.strokeStyle=col;
+        ctx.strokeRect(x+2,y+2,CELL_W-4,h-4);
+        ctx.lineWidth=1;
+        const cr=13,cx=x+CELL_W-cr-7,ccy=y+cr+7;
+        ctx.beginPath();ctx.arc(cx,ccy,cr,0,Math.PI*2);
+        ctx.fillStyle=col;ctx.fill();
+        ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.font='700 13px -apple-system,Segoe UI,Roboto,sans-serif';
+        ctx.fillText(String(routeNum[t.key]),cx,ccy+.5);
+        ctx.textAlign='left';ctx.textBaseline='alphabetic';
+      }
     });
     ctx.strokeStyle='#2e2e37';ctx.strokeRect(gx+.5,y+.5,TIME_W,h);
     y+=h;
@@ -654,6 +765,98 @@ async function shareImage(){
     const file=new File([blob],`baum-lineup-dia${day}.png`,{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       try{await navigator.share({files:[file],title:'Mi lineup · Baum 11'});return;}
+      catch(e){/* cancelado: cae a descarga */}
+    }
+    downloadBlob(blob,file.name);
+  },'image/png');
+}
+
+// --- Imagen PNG sólo con tu ruta de baile (itinerario) ---
+async function shareRouteImage(){
+  const day=state.day;
+  const stops=routeTimes(day);
+  if(!stops.length){
+    alert('Tu ruta está vacía.\n\nActiva «🕒 Modo ruta», toca celdas de la grilla para marcar tu recorrido y vuelve a intentar.');
+    return;
+  }
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  const SCALE=2,PAD=40,W=760;
+  const cardW=W-PAD*2,cardPad=18,gap=12,circleR=17;
+  const NAME_FONT='14px -apple-system,Segoe UI,Roboto,sans-serif';
+  const innerX=cardPad+circleR*2+10;          // texto a la derecha del círculo
+  const innerW=cardW-innerX-cardPad;
+
+  // 1. Precalcula cada parada (artista(s) que tocan donde estarás)
+  ctx.font=NAME_FONT;
+  const cards=stops.map((t,i)=>{
+    const stageId=state.route[day][t.key];
+    const arts=curList().filter(a=>a.slot&&a.slot.stage===stageId&&a.slot.time===t.key);
+    const txt=arts.length?arts.map(a=>a.name).join('   ·   '):'— sin artista asignado —';
+    const lines=wrapTextN(ctx,txt,innerW,4);
+    return {n:i+1,stage:STAGE_BY_ID[stageId],label:t.label,lines,
+            h:cardPad*2+circleR*2+4+lines.length*19};
+  });
+
+  // 2. Dimensiona el lienzo
+  const headerH=124;
+  const H=PAD+headerH+cards.reduce((a,c)=>a+c.h+gap,0)-gap+PAD;
+  canvas.width=W*SCALE;canvas.height=H*SCALE;
+  ctx.scale(SCALE,SCALE);
+
+  // 3. Fondo y encabezado
+  ctx.fillStyle='#16161a';ctx.fillRect(0,0,W,H);
+  ctx.textBaseline='alphabetic';ctx.textAlign='left';
+  ctx.fillStyle='#ffffff';
+  ctx.font='700 30px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('Mi ruta de baile',PAD,PAD+34);
+  ctx.fillStyle='#8a8a95';
+  ctx.font='15px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('Baum Festival 11 · '+(day==='22'?'Viernes 22':'Sábado 23')+' de mayo · Corferias',PAD,PAD+60);
+  ctx.fillStyle='#7c84f0';
+  ctx.font='600 13px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText(cards.length+(cards.length===1?' parada':' paradas'),PAD,PAD+87);
+
+  // 4. Tarjetas del itinerario
+  let y=PAD+headerH;
+  for(const c of cards){
+    const col=c.stage?c.stage.color:'#888';
+    roundRect(ctx,PAD,y,cardW,c.h,12);ctx.fillStyle='#1f1f25';ctx.fill();
+    roundRect(ctx,PAD,y,6,c.h,3);ctx.fillStyle=col;ctx.fill();
+    // círculo numerado
+    const ccx=PAD+cardPad+circleR,ccy=y+cardPad+circleR;
+    ctx.beginPath();ctx.arc(ccx,ccy,circleR,0,Math.PI*2);
+    ctx.fillStyle=col;ctx.fill();
+    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='700 16px -apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText(String(c.n),ccx,ccy+1);
+    // horario + escenario
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    const tx=PAD+innerX;
+    ctx.fillStyle='#ececf0';
+    ctx.font='700 16px -apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.fillText(c.label,tx,y+cardPad+circleR+6);
+    ctx.fillStyle=col;
+    ctx.font='700 14px -apple-system,Segoe UI,Roboto,sans-serif';
+    ctx.textAlign='right';
+    ctx.fillText(c.stage?c.stage.name:'(escenario)',PAD+cardW-cardPad,y+cardPad+circleR+6);
+    ctx.textAlign='left';
+    // artistas
+    ctx.fillStyle='#a9a9b3';ctx.font=NAME_FONT;
+    c.lines.forEach((ln,li)=>
+      ctx.fillText(ln,tx,y+cardPad+circleR*2+4+14+li*19));
+    y+=c.h+gap;
+  }
+
+  // 5. Pie
+  ctx.fillStyle='#5a5a63';ctx.font='12px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('baum.alejofig.com · Baum Festival Stage Organizer',PAD,H-PAD+18);
+
+  // 6. Comparte o descarga
+  canvas.toBlob(async blob=>{
+    const file=new File([blob],`mi-ruta-baum-dia${day}.png`,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'Mi ruta de baile · Baum 11'});return;}
       catch(e){/* cancelado: cae a descarga */}
     }
     downloadBlob(blob,file.name);
@@ -689,6 +892,10 @@ document.getElementById('clearBtn').onclick=clearGrid;
 document.getElementById('resetBtn').onclick=resetAll;
 document.getElementById('exportBtn').onclick=exportJSON;
 document.getElementById('shareBtn').onclick=shareImage;
+document.getElementById('routeImgBtn').onclick=shareRouteImage;
+document.getElementById('routeBtn').onclick=()=>{
+  routeMode=!routeMode;selectedId=null;render();
+};
 document.getElementById('panelBtn').onclick=()=>document.body.classList.toggle('panel-hidden');
 document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();
 document.getElementById('fileInput').addEventListener('change',e=>{
