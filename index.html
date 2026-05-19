@@ -388,6 +388,12 @@ function loadState(){
           if(!isNaN(n)&&n>max)max=n;
         }
       uid=max+1;
+      // migración: añade artistas de escenarios nuevos que falten en estados guardados
+      for(const d of ['22','23'])
+        for(const s of STAGES)
+          if(!state.lineup[d].some(a=>a.stage===s.id))
+            for(const name of INITIAL[d][s.id]||[])
+              state.lineup[d].push({id:'a'+(uid++),name,stage:s.id,slot:null});
       // ruta de baile (puede no existir en archivos viejos)
       if(obj.route&&typeof obj.route==='object')
         state.route={'22':obj.route['22']||{},'23':obj.route['23']||{}};
