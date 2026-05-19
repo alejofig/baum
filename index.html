@@ -308,8 +308,7 @@ const STAGES=[
   {id:'stamm',       name:'Stamm',        color:'#e85a93'},
   {id:'paramo',      name:'Páramo',       color:'#36a96a'},
   {id:'ra',          name:'RA',           color:'#ef7e54'},
-  {id:'todalanoche', name:'todalanoche',  color:'#8b6cf0'},
-  {id:'pendiente',   name:'(PENDIENTE)',  color:'#3aa6c9'}
+  {id:'todalanoche', name:'todalanoche',  color:'#8b6cf0'}
 ];
 const STAGE_BY_ID=Object.fromEntries(STAGES.map(s=>[s.id,s]));
 // Bloques de 1:30 h, de 15:00 a 03:00 (key = identificador estable, label = lo que se ve)
@@ -331,16 +330,14 @@ const INITIAL={
     stamm:['Cassian','Disclosure (DJ Set)','Joseph Capriati','Pablo Romero','Richie Hawtin'],
     paramo:['Alba Franch B2B Helena Lauwaert','DJ Cringey','Emilija','MALUGI','ØTTA','Pegassi','Supergloss','Younglolo'],
     ra:['Adiel B2B Quest','Boys Noize','Estella Boersma','Helena Hauff','ISAbella','Loumie','Lovefoxy'],
-    todalanoche:['BIIA','Cera Khin','Johannes Schuster','KUKO','LESSSS','Onlynumbers','Praxys (Live)'],
-    pendiente:[]
+    todalanoche:['BIIA','Cera Khin','Johannes Schuster','KUKO','LESSSS','Onlynumbers','Praxys (Live)']
   },
   '23':{
     baum:['Andres Campo','Felinah','Fenrick','Serafina','Shoki287','Sguzr B2B No One','Vini Vici'],
     stamm:['Elderbrook (DJ Set)','Emilio Mustafá','Felipe Gordon','Nina Kraviz','PAN-POT','Underworld (Live)'],
     paramo:['Agoria','Avalon Emerson','Brenda','Mall Grab','Nick León','Nicola Cruz','Nyksan','Paul Oakenfold'],
     ra:['Alarico B2B Yanamaste','ANNĒ B2B SHDW','DJ Rush','EV-1','Philippa Pacho','Planetary Assault Systems (Live)','Thelma','ÜBERKIKZ B2B Felicie'],
-    todalanoche:['Adrián Mills F2F Serafina','Davyboi F2F Parfait','Florian Picasso F2F Alex Nantaya','Franck F2F Fenrick','KUKO F2F Johannes Schuster','Mija F2F Ollie Lishman','Øslo F2F DJ Kinner','SAI F2F NORO$T'],
-    pendiente:[]
+    todalanoche:['Adrián Mills F2F Serafina','Davyboi F2F Parfait','Florian Picasso F2F Alex Nantaya','Franck F2F Fenrick','KUKO F2F Johannes Schuster','Mija F2F Ollie Lishman','Øslo F2F DJ Kinner','SAI F2F NORO$T']
   }
 };
 
@@ -449,8 +446,8 @@ function deleteArtist(id){
 function addArtist(){
   const name=prompt('Nombre del artista:');
   if(!name||!name.trim())return;
-  const choice=prompt('Escenario:\n  1 = BAUM\n  2 = Stamm\n  3 = Páramo\n  4 = RA\n  5 = todalanoche\n  6 = (PENDIENTE)','1');
-  const map={'1':'baum','2':'stamm','3':'paramo','4':'ra','5':'todalanoche','6':'pendiente'};
+  const choice=prompt('Escenario:\n  1 = BAUM\n  2 = Stamm\n  3 = Páramo\n  4 = RA\n  5 = todalanoche','1');
+  const map={'1':'baum','2':'stamm','3':'paramo','4':'ra','5':'todalanoche'};
   const stage=map[(choice||'').trim()];
   if(!stage){alert('Escenario no válido.');return;}
   curList().push({id:'a'+(uid++),name:name.trim(),stage,slot:null});
