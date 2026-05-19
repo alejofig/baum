@@ -161,9 +161,74 @@ body.route-mode .chip{cursor:pointer;}
 }
 body.route-mode #routeBanner{display:block;}
 
+/* ====================== MÓVIL: base ====================== */
+.tbtn .ico{font-size:14px;line-height:1;}
+.scrim{display:none;}
+.drawer-close{display:none;}
+#poolFab{display:none;}
+.brand-short{display:none;}
+
+/* ====================== MÓVIL: ≤720px ====================== */
+@media (max-width:720px){
+  header{padding:8px 12px;gap:8px;}
+  .brand b{font-size:14px;}
+  .brand small{display:none;}
+  .brand-full{display:none;}
+  .brand-short{display:block;}
+  .tabs{flex:1;}
+  .day-tab{flex:1;padding:9px 10px;}
+  .toolbar{margin-left:0;width:100%;gap:5px;justify-content:flex-start;}
+  .tbtn{padding:9px 11px;}
+  .tbtn .lbl,#dirtyDot .lbl{display:none;}      /* botones sólo con icono */
+  .tbtn .ico{font-size:17px;}
+  #panelBtn{display:none;}                       /* el cajón se abre con el FAB */
+
+  /* el panel se vuelve un cajón deslizable */
+  aside{
+    position:fixed;top:0;left:0;bottom:0;z-index:50;
+    width:86vw;max-width:340px;
+    transform:translateX(-102%);
+    transition:transform .22s ease;
+    box-shadow:2px 0 26px rgba(0,0,0,.4);
+  }
+  body.drawer-open aside{transform:translateX(0);}
+  body.drawer-open .scrim{display:block;}
+  body.panel-hidden aside{display:flex;}         /* anula el ocultar de escritorio */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49;}
+  .drawer-close{
+    display:flex;align-items:center;justify-content:center;
+    position:absolute;top:8px;right:8px;z-index:3;
+    width:36px;height:36px;border-radius:50%;
+    border:1px solid var(--border);background:var(--panel);color:var(--text);
+    font-size:16px;
+  }
+  .panel-top{padding-right:54px;}
+
+  /* botón flotante para abrir el cajón */
+  #poolFab{
+    display:flex;align-items:center;gap:6px;
+    position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:40;
+    padding:13px 22px;border:0;border-radius:26px;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:600;
+    box-shadow:0 5px 16px rgba(0,0,0,.35);
+  }
+  #poolFab .fab-count{
+    background:rgba(255,255,255,.25);border-radius:20px;
+    padding:1px 8px;font-size:12px;
+  }
+  body.drawer-open #poolFab{display:none;}
+
+  /* objetivos de toque más cómodos */
+  .chip{padding:10px;font-size:14px;}
+  .chip-del{opacity:.6;font-size:17px;padding:5px 8px;}
+  .g-cell{min-height:70px;}
+  .grid-wrap{padding:10px 10px 84px;-webkit-overflow-scrolling:touch;}
+  #routeBanner{font-size:11.5px;}
+}
+
 /* ====================== IMPRESIÓN ====================== */
 @media print{
-  header,aside,.hint{display:none!important;}
+  header,aside,.hint,.scrim,#poolFab,#routeBanner{display:none!important;}
   body,main{display:block;overflow:visible;}
   .grid-wrap{overflow:visible;padding:0;}
   .chip-del{display:none;}
@@ -174,7 +239,8 @@ body.route-mode #routeBanner{display:block;}
 
 <header>
   <div class="brand">
-    <b>🎛️ Baum Festival Stage Organizer</b>
+    <b class="brand-full">🎛️ Baum Festival Stage Organizer</b>
+    <b class="brand-short">🎛️ Baum 11</b>
     <small>Baum 11 · Corferias, Bogotá · 22–23 mayo 2026</small>
   </div>
 
@@ -184,20 +250,21 @@ body.route-mode #routeBanner{display:block;}
   </div>
 
   <div class="toolbar">
-    <span id="dirtyDot">● sin exportar</span>
-    <button class="tbtn" id="themeBtn" title="Tema claro/oscuro">🌓 Tema</button>
-    <button class="tbtn" id="panelBtn" title="Ocultar/mostrar panel">⬅ Panel</button>
-    <button class="tbtn" id="routeBtn" title="Marcar tu recorrido de la noche">🕒 Modo ruta</button>
-    <button class="tbtn" id="importBtn">⬆ Importar</button>
-    <button class="tbtn" id="exportBtn">⬇ JSON</button>
-    <button class="tbtn" id="shareBtn">📷 Grilla PNG</button>
-    <button class="tbtn primary" id="routeImgBtn">🗺️ Mi ruta PNG</button>
+    <span id="dirtyDot"><span class="ico">●</span><span class="lbl"> sin exportar</span></span>
+    <button class="tbtn" id="themeBtn" title="Tema claro/oscuro"><span class="ico">🌓</span><span class="lbl">Tema</span></button>
+    <button class="tbtn" id="panelBtn" title="Ocultar/mostrar panel"><span class="ico">⬅</span><span class="lbl">Panel</span></button>
+    <button class="tbtn" id="routeBtn" title="Marcar tu recorrido de la noche"><span class="ico">🕒</span><span class="lbl">Modo ruta</span></button>
+    <button class="tbtn" id="importBtn" title="Importar JSON"><span class="ico">⬆</span><span class="lbl">Importar</span></button>
+    <button class="tbtn" id="exportBtn" title="Exportar JSON"><span class="ico">⬇</span><span class="lbl">JSON</span></button>
+    <button class="tbtn" id="shareBtn" title="Imagen de la grilla"><span class="ico">📷</span><span class="lbl">Grilla PNG</span></button>
+    <button class="tbtn primary" id="routeImgBtn" title="Imagen de tu ruta"><span class="ico">🗺️</span><span class="lbl">Mi ruta PNG</span></button>
     <input type="file" id="fileInput" accept="application/json" hidden>
   </div>
 </header>
 
 <main>
   <aside>
+    <button class="drawer-close" id="drawerClose" aria-label="Cerrar panel">✕</button>
     <div class="panel-top">
       <input type="text" id="search" placeholder="Buscar artista…">
       <div class="panel-actions">
@@ -225,6 +292,12 @@ body.route-mode #routeBanner{display:block;}
     <div class="grid" id="grid"></div>
   </section>
 </main>
+
+<!-- Cajón móvil: backdrop + botón flotante -->
+<div class="scrim" id="scrim"></div>
+<button id="poolFab" title="Abrir artistas sin asignar">
+  ＋ <span class="fab-count" id="fabCount">0</span> sin asignar
+</button>
 
 <script>
 /* ============================================================
@@ -408,16 +481,21 @@ const gridEl=document.getElementById('grid');
 const searchEl=document.getElementById('search');
 const dirtyDot=document.getElementById('dirtyDot');
 const routeBtn=document.getElementById('routeBtn');
+const fabCount=document.getElementById('fabCount');
+
+// Cajón lateral (móvil)
+function openDrawer(){document.body.classList.add('drawer-open');}
+function closeDrawer(){document.body.classList.remove('drawer-open');}
 
 function render(){
   document.querySelectorAll('.day-tab').forEach(b=>
     b.classList.toggle('active',b.dataset.day===state.day));
   document.body.classList.toggle('route-mode',routeMode);
   routeBtn.classList.toggle('active',routeMode);
-  routeBtn.textContent=routeMode?'🕒 Ruta: ON':'🕒 Modo ruta';
+  routeBtn.querySelector('.lbl').textContent=routeMode?'Ruta ON':'Modo ruta';
   renderPool();
   renderGrid();
-  dirtyDot.style.display=dirty?'inline-block':'none';
+  dirtyDot.style.display=dirty?'inline-flex':'none';
   save();
 }
 
@@ -452,6 +530,7 @@ function makeChip(a){
     if(e.target===del)return;
     if(routeMode)return;            // en modo ruta el clic lo gestiona la celda
     selectedId=(selectedId===a.id)?null:a.id;   // selección por toque
+    if(selectedId)closeDrawer();    // móvil: cierra el cajón para tocar la celda
     render();
   });
   del.addEventListener('click',e=>{
@@ -482,6 +561,7 @@ function renderPool(){
     poolEl.appendChild(group);
   }
   poolCountEl.textContent=total;
+  fabCount.textContent=total;
   if(!poolEl.children.length){
     const msg=q?'Sin resultados para la búsqueda.':'Todos los artistas están en la grilla 🎉';
     poolEl.innerHTML='<div class="empty-pool">'+msg+'</div>';
@@ -491,7 +571,9 @@ function renderPool(){
 // --- Grilla principal: escenarios × horarios ---
 function renderGrid(){
   gridEl.innerHTML='';
-  gridEl.style.gridTemplateColumns=`92px repeat(${STAGES.length},minmax(170px,1fr))`;
+  const mobile=matchMedia('(max-width:720px)').matches;
+  gridEl.style.gridTemplateColumns=
+    `${mobile?72:92}px repeat(${STAGES.length},minmax(${mobile?140:170}px,1fr))`;
 
   const corner=document.createElement('div');
   corner.className='g-corner';
@@ -898,6 +980,13 @@ document.getElementById('routeBtn').onclick=()=>{
 };
 document.getElementById('panelBtn').onclick=()=>document.body.classList.toggle('panel-hidden');
 document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();
+// Cajón móvil
+document.getElementById('poolFab').onclick=openDrawer;
+document.getElementById('scrim').onclick=closeDrawer;
+document.getElementById('drawerClose').onclick=closeDrawer;
+// Reajusta el ancho de columnas al rotar / cambiar tamaño
+let resizeT;
+window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(renderGrid,150);});
 document.getElementById('fileInput').addEventListener('change',e=>{
   if(e.target.files[0])importJSON(e.target.files[0]);
   e.target.value='';
@@ -907,6 +996,7 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){
     e.preventDefault();exportJSON();
   }
+  if(e.key==='Escape')closeDrawer();
 });
 
 /* ============================================================
