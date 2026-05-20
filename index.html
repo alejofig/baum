@@ -7,18 +7,18 @@
 <style>
 /* ====================== TEMA / VARIABLES ====================== */
 :root{
-  --bg:#f6f6f8; --panel:#ffffff; --text:#1b1b20; --muted:#85858f;
+  --bg:#f6f6f8; --panel:#ffffff; --panel-glass:rgba(255,255,255,0.7); --text:#1b1b20; --muted:#85858f;
   --border:#e5e5ea; --cell:#fbfbfc; --cell-alt:#f4f4f6;
   --hover:#eef0ff; --accent:#5b62e0; --shadow:rgba(0,0,0,.06);
 }
 :root[data-theme=dark]{
-  --bg:#16161a; --panel:#1f1f25; --text:#ececf0; --muted:#8a8a95;
+  --bg:#16161a; --panel:#1f1f25; --panel-glass:rgba(31,31,37,0.7); --text:#ececf0; --muted:#8a8a95;
   --border:#2e2e37; --cell:#26262e; --cell-alt:#22222a;
   --hover:#2c3050; --accent:#7c84f0; --shadow:rgba(0,0,0,.4);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme=light]){
-    --bg:#16161a; --panel:#1f1f25; --text:#ececf0; --muted:#8a8a95;
+    --bg:#16161a; --panel:#1f1f25; --panel-glass:rgba(31,31,37,0.7); --text:#ececf0; --muted:#8a8a95;
     --border:#2e2e37; --cell:#26262e; --cell-alt:#22222a;
     --hover:#2c3050; --accent:#7c84f0; --shadow:rgba(0,0,0,.4);
   }
@@ -36,7 +36,9 @@ button{font-family:inherit;cursor:pointer;}
 header{
   display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:10px 16px;border-bottom:1px solid var(--border);
-  background:var(--panel);
+  background:var(--panel-glass);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:100;
 }
 .brand{display:flex;flex-direction:column;line-height:1.2;}
 .brand b{font-size:15px;}
@@ -52,19 +54,34 @@ header{
   border:1px solid var(--border);background:var(--panel);color:var(--text);
   padding:6px 11px;border-radius:7px;font-size:12px;font-weight:500;
   display:inline-flex;align-items:center;gap:5px;
+  transition:all 0.2s ease;
 }
-.tbtn:hover{background:var(--hover);}
+.tbtn:hover{background:var(--hover);transform:translateY(-1px);box-shadow:0 2px 8px var(--shadow);}
 .tbtn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
-.tbtn.primary:hover{filter:brightness(1.08);}
+.tbtn.primary:hover{filter:brightness(1.08);box-shadow:0 0 12px var(--accent);}
 .tbtn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 #dirtyDot{font-size:11px;color:#e8a23c;font-weight:600;display:none;}
+.countdown{
+  font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace;
+  font-size: 13px; font-weight: 700; color: var(--accent);
+  background: var(--hover); padding: 5px 10px; border-radius: 7px;
+  display: flex; align-items: center; gap: 6px;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.countdown .ico{font-size:14px;}
 
 /* ====================== LAYOUT ====================== */
 main{flex:1;display:flex;min-height:0;}
 aside{
   width:248px;flex-shrink:0;border-right:1px solid var(--border);
-  background:var(--panel);display:flex;flex-direction:column;min-height:0;
+  background:var(--panel-glass);display:flex;flex-direction:column;min-height:0;
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  overflow-y:auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
 }
+aside::-webkit-scrollbar { width: 4px; }
+aside::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 body.panel-hidden aside{display:none;}
 .panel-top{padding:12px;border-bottom:1px solid var(--border);}
 #search{
@@ -73,6 +90,55 @@ body.panel-hidden aside{display:none;}
 }
 .panel-actions{display:flex;flex-wrap:wrap;gap:6px;}
 .panel-actions .tbtn{flex:1;justify-content:center;min-width:104px;}
+
+/* ====================== BIOGRAFÍAS ====================== */
+.bio-section{
+  padding:16px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, var(--cell-alt) 0%, var(--bg) 100%);
+  display:none;
+  animation: slideDown 0.3s ease-out;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.bio-title{
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  margin-bottom:10px;
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.bio-title::before{
+  content:"";
+  display:inline-block;
+  width:4px;
+  height:14px;
+  background:var(--accent);
+  border-radius:2px;
+}
+.bio-text{
+  font-size:13px;
+  line-height:1.6;
+  color:var(--text);
+  margin-bottom:16px;
+  opacity:0.9;
+}
+.bio-sc-wrap{
+  border-radius:12px;
+  overflow:hidden;
+  background:#000;
+  height:160px;
+  border:1px solid rgba(255,255,255,0.1);
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+}
+.bio-sc-wrap iframe{width:100%;height:100%;border:none;}
+
 .pool-meta{
   display:flex;justify-content:space-between;align-items:center;
   padding:9px 12px;font-size:12px;color:var(--muted);font-weight:600;
@@ -92,16 +158,19 @@ body.panel-hidden aside{display:none;}
 .hint{font-size:11px;color:var(--muted);padding:10px 12px;line-height:1.5;border-top:1px solid var(--border);}
 
 /* ====================== CHIPS ====================== */
+.chip.selected{background:var(--accent-low) !important; outline:2px solid var(--accent); outline-offset:2px;}
+.chip.selected .chip-name{font-weight:700;}
 .chip{
   position:relative;display:flex;align-items:center;gap:6px;
   border:1px solid var(--border);border-left:3px solid #888;
   border-radius:7px;padding:6px 8px;margin-bottom:5px;
   font-size:12.5px;line-height:1.3;
   cursor:grab;user-select:none;
+  transition:all 0.2s ease;
 }
-.chip:hover{filter:brightness(1.04);}
+.chip:hover{filter:brightness(1.04);transform:translateX(2px);box-shadow:0 2px 8px var(--shadow);}
 .chip.dragging{opacity:.4;}
-.chip.selected{outline:2px solid var(--accent);outline-offset:1px;}
+.chip.selected{outline:2px solid var(--accent);outline-offset:1px;box-shadow:0 0 10px var(--accent);}
 .chip-name{flex:1;word-break:break-word;}
 .chip-del{
   border:0;background:transparent;color:var(--muted);
@@ -124,6 +193,7 @@ body.panel-hidden aside{display:none;}
   position:sticky;top:0;z-index:3;
   padding:11px 8px;text-align:center;font-weight:700;font-size:13px;
   border-top:3px solid #888;
+  transition:all 0.3s ease;
 }
 .g-time{
   position:sticky;left:0;z-index:2;background:var(--cell-alt);
@@ -226,6 +296,64 @@ body.route-mode #routeBanner{display:block;}
   #routeBanner{font-size:11.5px;}
 }
 
+/* ====================== MODAL ====================== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.modal.open {
+  display: flex;
+  opacity: 1;
+}
+.modal-content {
+  position: relative;
+  max-width: 95%;
+  max-height: 95%;
+  background: var(--panel);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal.open .modal-content {
+  transform: scale(1);
+}
+.modal-content img {
+  display: block;
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+}
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+}
+.close-modal:hover { background: rgba(0,0,0,0.8); }
+
 /* ====================== IMPRESIÓN ====================== */
 @media print{
   header,aside,.hint,.scrim,#poolFab,#routeBanner{display:none!important;}
@@ -249,6 +377,11 @@ body.route-mode #routeBanner{display:block;}
     <button class="day-tab" data-day="23">Sáb 23 mayo</button>
   </div>
 
+  <div class="countdown" id="countdown" title="Tiempo hasta el festival">
+    <span class="ico">⏳</span>
+    <span id="timerText">00d 00h 00m 00s</span>
+  </div>
+
   <div class="toolbar">
     <span id="dirtyDot"><span class="ico">●</span><span class="lbl"> sin exportar</span></span>
     <button class="tbtn" id="themeBtn" title="Tema claro/oscuro"><span class="ico">🌓</span><span class="lbl">Tema</span></button>
@@ -256,8 +389,11 @@ body.route-mode #routeBanner{display:block;}
     <button class="tbtn" id="routeBtn" title="Marcar tu recorrido de la noche"><span class="ico">🕒</span><span class="lbl">Modo ruta</span></button>
     <button class="tbtn" id="importBtn" title="Importar JSON"><span class="ico">⬆</span><span class="lbl">Importar</span></button>
     <button class="tbtn" id="exportBtn" title="Exportar JSON"><span class="ico">⬇</span><span class="lbl">JSON</span></button>
+    <button class="tbtn" id="calBtn" title="Exportar calendario (.ics)"><span class="ico">📅</span><span class="lbl">Calendario</span></button>
     <button class="tbtn" id="shareBtn" title="Imagen de la grilla"><span class="ico">📷</span><span class="lbl">Grilla PNG</span></button>
-    <button class="tbtn primary" id="routeImgBtn" title="Imagen de tu ruta"><span class="ico">🗺️</span><span class="lbl">Mi ruta PNG</span></button>
+    <button class="tbtn" id="storiesBtn" title="Imagen vertical para Stories"><span class="ico">📱</span><span class="lbl">Stories</span></button>
+    <button class="tbtn" id="mapBtn" title="Ver mapa del festival"><span class="ico">🗺️</span><span class="lbl">Mapa</span></button>
+    <button class="tbtn primary" id="routeImgBtn" title="Imagen de tu ruta"><span class="ico">🚩</span><span class="lbl">Mi ruta PNG</span></button>
     <input type="file" id="fileInput" accept="application/json" hidden>
   </div>
 </header>
@@ -265,13 +401,10 @@ body.route-mode #routeBanner{display:block;}
 <main>
   <aside>
     <button class="drawer-close" id="drawerClose" aria-label="Cerrar panel">✕</button>
-    <div class="panel-top">
-      <input type="text" id="search" placeholder="Buscar artista…">
-      <div class="panel-actions">
-        <button class="tbtn" id="addBtn">＋ Añadir</button>
-        <button class="tbtn" id="clearBtn">↩ Vaciar grilla</button>
-        <button class="tbtn" id="resetBtn">⟳ Reiniciar</button>
-      </div>
+    <div id="bioSection" class="bio-section">
+      <div class="bio-title">Biografía</div>
+      <div id="bioText" class="bio-text"></div>
+      <div id="bioSC" class="bio-sc-wrap"></div>
     </div>
     <div class="pool-meta">
       <span>Sin asignar</span><span id="poolCount">0</span>
@@ -298,6 +431,13 @@ body.route-mode #routeBanner{display:block;}
 <button id="poolFab" title="Abrir artistas sin asignar">
   ＋ <span class="fab-count" id="fabCount">0</span> sin asignar
 </button>
+
+<div id="mapModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeMap">&times;</span>
+    <img src="486015722_3115642168590905_3569102163261325592_n.jpg" alt="Baum Festival Map">
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -341,6 +481,354 @@ const INITIAL={
   }
 };
 
+// Bio helper
+const ARTIST_DATA = {
+  "6EJOU": {
+    "bio": "6EJOU is a French industrial techno live act known for his raw, hardware-driven sound. Since 2019, he has gained a massive following for his high-energy performances that bridge hypnotic repetition with industrial aggression. He is the founder of the Industrial Violence label and a pioneer in the modern 'hard' live scene.",
+    "soundcloud": "https://soundcloud.com/6ejou"
+  },
+  "SNTS": {
+    "bio": "The masked figure of SNTS has become a synonymous icon for the darker, industrial-focused strain of techno. Known for his uncompromising sonic palette and visceral live sets, he heads the Sacred Court label, where he champions a gritty, ritualistic approach to dance music that has influenced a generation of techno producers.",
+    "soundcloud": "https://soundcloud.com/snts-records"
+  },
+  "Aleja Vargas": {
+    "bio": "A cornerstone of Bogotá's underground scene, Aleja Vargas is celebrated for her deep, atmospheric techno. With over a decade of experience, her sets are characterized by energetic percussion and an immersive storytelling quality that has made her a resident favorite at Baum and beyond.",
+    "soundcloud": "https://soundcloud.com/alejavargasmusic"
+  },
+  "Barbara Lago": {
+    "bio": "Hailing from Spain, Barbara Lago is a leading figure in the European hard techno and hard bounce movement. Her sets are defined by high-intensity rhythms, often touching 160 BPM, blending acid foundations with modern industrial textures. She is a regular at festivals like Monegros and Verknipt.",
+    "soundcloud": "https://soundcloud.com/barbaralago"
+  },
+  "Dollhouse": {
+    "bio": "Dollhouse is a Bogotá-based collective and artist group focused on the cutting edge of electronic music. Known for their inclusive events and energetic multi-genre sets, they have become a vital part of the local circuit, promoting a fusion of techno, house, and experimental club sounds.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "MJ": {
+    "bio": "MJ (JP) is a Tokyo-born DJ and producer recognized for his functional, groove-oriented techno. His style emphasizes consistency and rolling rhythms, making him a sought-after selector in both Asian and international club circuits where precision and 'proper' techno are the priority.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "Noise Mafia": {
+    "bio": "Noise Mafia is a Colombian standout known for his high-energy blend of hard trance, hard dance, and hard psy. Gaining international recognition after his tracks were championed by leaders like Sara Landry, he successfully integrates Latin American textures into a global rave sound.",
+    "soundcloud": "https://soundcloud.com/noisemafia"
+  },
+  "Novah": {
+    "bio": "Antwerp-based Novah is a rising star in the hard techno scene, blending acid, industrial, and psytrance elements into a cohesive, high-energy package. Her rapid rise in the European circuit is marked by a focus on powerful kicks and emotional intensity.",
+    "soundcloud": "https://soundcloud.com/novah_music"
+  },
+  "Pawlowski": {
+    "bio": "French producer Pawlowski is at the forefront of the 90s rave and acid techno revival. Combining nostalgic warehouse aesthetics with modern production power, his tracks like 'Future Legacy' have become anthems in the contemporary hard techno scene.",
+    "soundcloud": "https://soundcloud.com/pawlowski-music"
+  },
+  "Cassian": {
+    "bio": "Sydney-born, LA-based Cassian is a key figure in the melodic house and techno space. A core member of the Rose Avenue family and a frequent collaborator with RÜFÜS DU SOL, his polished sound and mastery of synthesis have made him a staple on the global festival circuit.",
+    "soundcloud": "https://soundcloud.com/cassian"
+  },
+  "Disclosure": {
+    "bio": "The Lawrence brothers transformed the global electronic landscape with their debut album 'Settle.' Disclosure remains one of the most influential acts in modern house music, masterfully blending UK garage rhythms with pop sensibilities and club-ready grooves.",
+    "soundcloud": "https://soundcloud.com/disclosuremusic"
+  },
+  "Joseph Capriati": {
+    "bio": "Joseph Capriati is one of techno’s most versatile and beloved ambassadors. From his early roots in Neapolitan techno to his legendary marathon sets at Amnesia Ibiza, Capriati is a master of the 'groove,' effortlessly navigating between deep house and high-energy techno.",
+    "soundcloud": "https://soundcloud.com/joseph-capriati"
+  },
+  "Pablo Romero": {
+    "bio": "NYC-based Pablo Romero brings a deep, vinyl-focused perspective to the dance floor. Founder of Archivio Records, his sets are a testament to his Colombian heritage and his immersion in the Brooklyn underground, blending gritty techno with soulful, percussive layers.",
+    "soundcloud": "https://soundcloud.com/pabloromero"
+  },
+  "Richie Hawtin": {
+    "bio": "A true pioneer of electronic music, Richie Hawtin (aka Plastikman) has spent decades pushing the boundaries of minimal techno and DJ technology. His influence on the genre is immeasurable, from his early 90s Detroit roots to his visionary ENTER. and CLOSE projects.",
+    "soundcloud": "https://soundcloud.com/richiehawtin"
+  },
+  "Alba Franch": {
+    "bio": "Madrid’s Alba Franch is a rising star in the hardgroove and techno circuit. A resident at the iconic Mondo Disko, her sets are technically impeccable, weaving through driving rhythms and nostalgic trance elements with classical precision.",
+    "soundcloud": "https://soundcloud.com/albafranch"
+  },
+  "Helena Lauwaert": {
+    "bio": "Belgian DJ and event organizer Helena Lauwaert is known for her fast-paced, genre-fluid sets. Rooted in speed garage and hard house, her high-energy approach and advocacy for queer representation have made her a vital voice in the new European club scene.",
+    "soundcloud": "https://soundcloud.com/helenalauwaert"
+  },
+  "DJ Cringey": {
+    "bio": "Berlin-based DJ Cringey (Josie Doser) takes a playful yet intense approach to club music. Blending bass, techno, and acid with experimental vocals, she creates a high-energy dance floor experience that challenges traditional genre boundaries.",
+    "soundcloud": "https://soundcloud.com/djcringey"
+  },
+  "Emilija": {
+    "bio": "Lithuanian-born, Brussels-based Emilija is a specialist in high-energy hard house and trance. Her sets are a celebration of inclusivity and spontaneity, characterized by heavy breaks and nostalgic textures from the early rave era.",
+    "soundcloud": "https://soundcloud.com/emilijamusic"
+  },
+  "MALUGI": {
+    "bio": "Often described as 'the happiest man in dance music,' Berlin's MALUGI brings an infectious energy to house and trance. Founder of the Club Heart Broken series, his sound is a euphoric blend of UK garage, pop influences, and driving dance floor fillers.",
+    "soundcloud": "https://soundcloud.com/malugi"
+  },
+  "ØTTA": {
+    "bio": "Portugal’s ØTTA has become a leading name in the hard techno and trance resurgence. Her sets are emotional, fast, and unashamedly rave-focused, characterized by high-tempo rhythms and powerful cinematic breakdowns.",
+    "soundcloud": "https://soundcloud.com/ottadj"
+  },
+  "Pegassi": {
+    "bio": "Belgian producer Pegassi is known for his genre-defying sound that bridges eurodance, trance, and hard house. His ability to craft catchy, high-impact melodies has made him a favorite in the modern high-tempo rave scene.",
+    "soundcloud": "https://soundcloud.com/pegassi"
+  },
+  "Supergloss": {
+    "bio": "Berlin-based Supergloss draws inspiration from the 90s and early 00s rave culture. A classically trained pianist, she creates an energetic blend of acid and trance that celebrates the heritage of dance music with a modern, high-intensity twist.",
+    "soundcloud": "https://soundcloud.com/superglozz"
+  },
+  "Younglolo": {
+    "bio": "Younglolo is a rising talent in the Colombian electronic scene, known for his contribution to the local house and techno circuit. With a focus on groovy rhythms and local flavor, he is a representative of the new wave of Bogotá DJs.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "Adiel": {
+    "bio": "Italian DJ and Danza Tribale label head Adiel is a master of hypnotic, tribal-inflected techno. Her sets at the legendary Goa Club in Rome established her as a selector capable of creating deep, ritualistic atmospheres that captivate the dance floor.",
+    "soundcloud": "https://soundcloud.com/adiel-1"
+  },
+  "Quest": {
+    "bio": "Quest is a selector's selector, known for his deep knowledge of electro, EBM, and outré techno. His genre-bending sets are a journey through underground dance music's history, always delivered with an impeccable ear for detail.",
+    "soundcloud": "https://soundcloud.com/quest"
+  },
+  "Boys Noize": {
+    "bio": "Alexander Ridha, aka Boys Noize, is a titan of electronic music. From his early electro-house anthems to his high-profile collaborations and uncompromising techno sets, he remains one of the most versatile and influential artists in the industry.",
+    "soundcloud": "https://soundcloud.com/boysnoize"
+  },
+  "Estella Boersma": {
+    "bio": "Transitioning from the fashion world to the DJ booth, Estella Boersma has quickly become a respected name in the techno and breaks scene. Her sound is a punchy blend of electro and high-tempo techno, delivered with undeniable style and energy.",
+    "soundcloud": "https://soundcloud.com/thethirdroom_t3r/stone-techno-festival-2024-estella-boersma-arte-concert"
+  },
+  "Helena Hauff": {
+    "bio": "Helena Hauff is a purist of the highest order, known for her strictly-vinyl sets of electro, industrial, and acid. Her raw, uncompromising sound and residency at Hamburg’s Golden Pudel have made her one of the most respected figures in modern underground music.",
+    "soundcloud": "https://soundcloud.com/helena-hauff"
+  },
+  "ISAbella": {
+    "bio": "A leading figure in Barcelona’s queer club scene, ISAbella is a co-founder of MARICAS and founder of the Mistress night. Her sets are a vibrant fusion of house, techno, and trance, always delivered with a focus on freedom and community.",
+    "soundcloud": "https://soundcloud.com/isabelladj"
+  },
+  "Loumie": {
+    "bio": "Medellín-based Loumie is known for his organic, nostalgic approach to house music. Fusing house and tech house with indie and R&B textures, his sound is characterized by deep grooves and atmospheric soul.",
+    "soundcloud": "https://soundcloud.com/loumie"
+  },
+  "Lovefoxy": {
+    "bio": "Berlin’s Lovefoxy is a high-energy DJ and dancer who embodies the 90s house spirit. Her sets are as much a performance as they are a musical journey, characterized by soulful house grooves and an infectious, positive energy.",
+    "soundcloud": "https://soundcloud.com/lovefoxy"
+  },
+  "BIIA": {
+    "bio": "Portugal’s BIIA creates a unique intersection of raw industrial techno and emotional narrative. Her high-intensity sets are known for their power and vulnerability, making her a standout voice in the contemporary hard techno landscape.",
+    "soundcloud": "https://soundcloud.com/biia-music"
+  },
+  "Cera Khin": {
+    "bio": "Cera Khin is a champion of hard, high-tempo techno and mental health advocacy. Founder of the Lazyrax label, her sets are a high-energy fusion of acid, industrial, and rave classics, always delivered with a fearless attitude.",
+    "soundcloud": "https://soundcloud.com/cerakhin"
+  },
+  "Johannes Schuster": {
+    "bio": "A resident for Cologne’s Unreal, Johannes Schuster is a specialist in dark, industrial energy. His sound blends heavy warehouse kicks with emotional synths, creating a dynamic and powerful techno experience.",
+    "soundcloud": "https://soundcloud.com/johannes-schuster"
+  },
+  "KUKO": {
+    "bio": "KUKO is an emerging voice in the Cologne techno scene, known for his melancholic yet driving industrial sound. His productions on 44 Label Group and high-energy sets have quickly established him as a talent to watch.",
+    "soundcloud": "https://soundcloud.com/kukomusic"
+  },
+  "LESSSS": {
+    "bio": "French powerhouse LESSSS is known for her high-impact, uncompromising hard techno. Her sets are a masterclass in tension and release, characterized by relentless industrial rhythms and a raw, dark aesthetic.",
+    "soundcloud": "https://soundcloud.com/lessss-music"
+  },
+  "Onlynumbers": {
+    "bio": "The anonymous project Onlynumbers has taken the hard techno scene by storm with high-energy, rave-inspired productions. Blending heavy industrial kicks with melodic trance elements, the project is a centerpiece of the modern rave revival.",
+    "soundcloud": "https://soundcloud.com/onlynumbers"
+  },
+  "Praxys": {
+    "bio": "Praxys is a Colombian live electronics specialist known for his hardware-driven performances. His approach to synthesis and machine-driven improvisation creates a unique, evolving techno experience that highlights the local scene's technical depth.",
+    "soundcloud": "https://soundcloud.com/praxys"
+  },
+  "Andres Campo": {
+    "bio": "Spanish techno hero Andres Campo is a resident at the legendary Florida 135. Known for his technical skill and infectious charisma, he is a master of the 'big room' techno sound that balances groove with raw energy.",
+    "soundcloud": "https://soundcloud.com/andrescampo"
+  },
+  "Felinah": {
+    "bio": "Felinah is a rising force in the Bogotá techno scene. Her sets are a blend of dark textures and driving rhythms, representing the fresh energy and dedication of the new generation of Colombian electronic artists.",
+    "soundcloud": "https://soundcloud.com/felinah"
+  },
+  "Fenrick": {
+    "bio": "French DJ and producer Fenrick is celebrated for his 'galop' techno style—a bouncy, high-tempo fusion of trance and techno. Based in Brussels, his sets are known for their catchy melodies and relentless dance floor energy.",
+    "soundcloud": "https://soundcloud.com/fenrick-music"
+  },
+  "Serafina": {
+    "bio": "Berlin-based Serafina balances a career as a medical doctor with a deep immersion in industrial techno. Her sets are characterized by pulse and precision, moving between heavy industrial sounds and faster, melodic techno rhythms.",
+    "soundcloud": "https://soundcloud.com/serafina-music"
+  },
+  "Shoki287": {
+    "bio": "Berlin-based Shoki287 is known for her 'unapologetically free' sets that focus on bounce and groove. Her sound is a clean yet powerful blend of modern techno that maintains a constant, infectious energy on the dance floor.",
+    "soundcloud": "https://soundcloud.com/shoki287"
+  },
+  "Sguzr": {
+    "bio": "Sguzr is a prominent name in the Colombian underground circuit. His sound is rooted in deep, rolling techno with a focus on industrial textures and local club dynamics.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "No One": {
+    "bio": "No One is an artist active in the Bogotá industrial scene, specializing in raw and experimental techno. Their sets often explore the darker, more visceral sides of electronic music with a local, underground focus.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "Vini Vici": {
+    "bio": "The duo Vini Vici redefined the presence of psytrance on the global stage. Their massive hits like 'Great Spirit' and their high-octane festival sets have made them one of the most successful acts in the electronic music world.",
+    "soundcloud": "https://soundcloud.com/vinivicimusic"
+  },
+  "Elderbrook": {
+    "bio": "Multi-instrumentalist and producer Elderbrook is a standout in the electronic pop space. Known for his soulful vocals and intricate live performances, he has successfully bridged the gap between club music and chart-topping success.",
+    "soundcloud": "https://soundcloud.com/elderbrook"
+  },
+  "Emilio Mustafá": {
+    "bio": "A veteran of the Bogotá house scene, Emilio Mustafá is a respected selector known for his deep knowledge of house and disco. His sets are a celebration of groove and sophisticated club culture.",
+    "soundcloud": "https://soundcloud.com/emiliomustafa"
+  },
+  "Felipe Gordon": {
+    "bio": "Felipe Gordon is the 'king' of Colombian jazz-house. His sophisticated productions and eclectic DJ sets have earned him international acclaim, making him a central figure in the global soulful house movement.",
+    "soundcloud": "https://soundcloud.com/felipe-gordon"
+  },
+  "Nina Kraviz": {
+    "bio": "Techno icon Nina Kraviz is celebrated for her fearless, eclectic approach to selection. As the head of the Trip label, she has championed everything from raw techno to acid and experimental IDM, remaining one of the most enigmatic figures in the industry.",
+    "soundcloud": "https://soundcloud.com/nina-kraviz"
+  },
+  "PAN-POT": {
+    "bio": "Berlin-based duo Tassilo Ippenberger and Thomas Benedix, known collectively as Pan-Pot, have established themselves as masters of the dance floor since their debut. Their sound, characterized by atmospheric textures and driving, peak-time energy, has made them a cornerstone of the global techno scene. As founders of the influential Second State label, they continue to push the boundaries of modern techno while maintaining their status as headline regulars at festivals like Time Warp and Awakenings.",
+    "soundcloud": "https://soundcloud.com/awakenings/pan-pot-awakenings-festival-2025"
+  },
+  "Underworld": {
+    "bio": "Electronic music royalty Underworld have been pushing the boundaries of the genre for decades. From 'Born Slippy' to their visionary live shows, Rick Smith and Karl Hyde continue to define the intersection of rave, pop, and art.",
+    "soundcloud": "https://soundcloud.com/underworld"
+  },
+  "Agoria": {
+    "bio": "French producer and cinema-lover Agoria is a polymath of electronic music. Known for his sophisticated, melodic productions and his ability to weave complex narratives in his DJ sets, he is a true artist of the dance floor.",
+    "soundcloud": "https://soundcloud.com/agoria"
+  },
+  "Avalon Emerson": {
+    "bio": "Avalon Emerson is a master of eclectic, high-energy selection. Known for her unique 'cyber-techno' sound and her ability to blend disparate genres into a cohesive, euphoric experience, she is one of the most innovative DJs working today.",
+    "soundcloud": "https://soundcloud.com/avalonemerson/avalon-emerson-9000streams-triple-j-mix"
+  },
+  "Brenda": {
+    "bio": "Brenda is a Bogotá-based artist known for her experimental and atmospheric approach to techno. Her sets often explore the intersection of field recordings, industrial rhythms, and local textures.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "Mall Grab": {
+    "bio": "Australian-born, London-based Mall Grab brings a raw, high-energy spirit to house and techno. From his early lo-fi house roots to his current high-octane rave sound, Jordon Alexander is a force of nature in the booth.",
+    "soundcloud": "https://soundcloud.com/mallgrab"
+  },
+  "Nick León": {
+    "bio": "Miami’s Nick León is at the forefront of the new 'global club' sound. Blending Latin percussion with gritty club textures and experimental electronics, his sound is a vibrant representation of modern Pan-American dance music.",
+    "soundcloud": "https://soundcloud.com/platform/nick-leon-boiler-room-medellin"
+  },
+  "Nicola Cruz": {
+    "bio": "Nicola Cruz is a pioneer of 'Andean electronic folklore.' Blending traditional South American rhythms with modern synthesis and deep electronic textures, his music is a bridge between ancestral heritage and the contemporary dance floor.",
+    "soundcloud": "https://soundcloud.com/nicolacruz"
+  },
+  "Nyksan": {
+    "bio": "TraTraTrax co-founder Nyksan is a Bogotá-born sound artist known for his experimental and atmospheric approach. His work often blurs the lines between sound design and club music, exploring the 'drone' and experimental side of the spectrum.",
+    "soundcloud": "https://soundcloud.com/nyksan"
+  },
+  "Paul Oakenfold": {
+    "bio": "A founding father of modern trance and the UK house scene, Paul Oakenfold’s legacy is monumental. From his early Ibiza trips to his massive global success, he remains a legend who helped shape the face of electronic music.",
+    "soundcloud": "https://soundcloud.com/pauloakenfold"
+  },
+  "Alarico": {
+    "bio": "Milan-based Alarico is known for his fast-paced rhythms and 'kinky grooves.' Drawing inspiration from 90s techno, his sound is a modern take on the raw, forward-thinking energy that defined the early techno era.",
+    "soundcloud": "https://soundcloud.com/alarico-zucchi"
+  },
+  "Yanamaste": {
+    "bio": "Georgian artist Yanamaste is a leading figure in the raw and industrial techno movement. His sets are characterized by uncompromising intensity and a focus on the gritty, high-energy foundations of the genre.",
+    "soundcloud": "https://soundcloud.com/yanamaste"
+  },
+  "ANNĒ": {
+    "bio": "Greek producer ANNĒ is celebrated for her 90s-inspired, high-energy techno sound. Her sets are a masterclass in pumping dynamics and dance floor interaction, making her a vital part of the modern techno resurgence.",
+    "soundcloud": "https://soundcloud.com/anne-techno"
+  },
+  "SHDW": {
+    "bio": "Half of the influential SHDW & Obscure Shape, SHDW is known for his mastery of 'modern classic' techno. Blending acid, industrial, and rave influences with impeccable production, he is a mainstay of the Berlin techno landscape.",
+    "soundcloud": "https://soundcloud.com/shdw_obscureshape"
+  },
+  "DJ Rush": {
+    "bio": "A Chicago legend and a king of hard techno, DJ Rush is known for his high-speed, soul-infused techno sets. His infectious energy and legendary mic-presence have made him one of the most beloved figures in rave history.",
+    "soundcloud": "https://soundcloud.com/dj-rush-official"
+  },
+  "EV-1": {
+    "bio": "EV-1 is a precise and knowledgeable selector based in Berlin. Known for his deep crates and focus on technical perfection, he represents the understated excellence of the contemporary techno underground.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "Philippa Pacho": {
+    "bio": "Swedish DJ Philippa Pacho is known for her 'knife-edged' focus and emotional intensity. A resident at Berlin’s Berghain, her sets are a journey through the many shades of techno, delivered with technical mastery and deep narrative flow.",
+    "soundcloud": "https://soundcloud.com/philippapacho"
+  },
+  "Planetary Assault Systems": {
+    "bio": "The seminal project of techno pioneer Luke Slater, Planetary Assault Systems has defined the genre's futuristic, psychedelic sound for decades. A PAS live set is a masterclass in synthesis and dance floor hypnosis.",
+    "soundcloud": "https://soundcloud.com/luke-slater"
+  },
+  "Thelma": {
+    "bio": "French producer Thelma is known for her intense, high-impact hard techno. Her sound is a relentless fusion of industrial rhythms and dark atmosphere, positioning her at the forefront of the new French techno wave.",
+    "soundcloud": "https://soundcloud.com/thelma-techno"
+  },
+  "ÜBERKIKZ": {
+    "bio": "ÜBERKIKZ is known for her hypnotic, minimalistic techno sets. Incorporating tribal rhythms and folk melodies, she creates a ritualistic dance floor experience that emphasizes deep connection and immersive soundscapes.",
+    "soundcloud": "https://soundcloud.com/uberkikz"
+  },
+  "Felicie": {
+    "bio": "French artist Felicie is known for her raw and powerful techno sets. Combining dark textures with high-energy grooves, she has become a respected name in the international industrial and warehouse circuit.",
+    "soundcloud": "https://soundcloud.com/felicie-techno"
+  },
+  "Adrián Mills": {
+    "bio": "German sensation Adrián Mills has quickly risen to the top of the hard techno scene. Known for his high-energy, rave-focused sets and his charismatic presence, he represents the new wave of hard-hitting dance music.",
+    "soundcloud": "https://soundcloud.com/adrian-mills-music"
+  },
+  "Davyboi": {
+    "bio": "Davyboi brings a high-energy fusion of trance, eurodance, and hardhouse to the dance floor. With an emotional and fast-paced style, his sets are a celebration of rave's most euphoric and energetic elements.",
+    "soundcloud": "https://soundcloud.com/davyboimusic"
+  },
+  "Parfait": {
+    "bio": "A resident of the legendary Possession parties in Paris, Parfait is a master of hard, uncompromising techno. Her sets are known for their raw power and their ability to command the largest and darkest dance floors.",
+    "soundcloud": "https://soundcloud.com/parfait-music"
+  },
+  "Florian Picasso": {
+    "bio": "Florian Picasso blends high-energy house and electro with a sophisticated artistic lineage. His vibrant productions and high-octane festival performances have made him a mainstay on the global electronic stage.",
+    "soundcloud": "https://soundcloud.com/florianpicasso"
+  },
+  "Alex Nantaya": {
+    "bio": "Alex Nantaya is known for her industrial and dark techno sound. Her sets explore the visceral and powerful side of electronic music, delivered with a focus on deep, driving rhythms and warehouse aesthetics.",
+    "soundcloud": "https://soundcloud.com/alex-nantaya"
+  },
+  "Franck": {
+    "bio": "Scottish producer Franck is at the forefront of the hard techno resurgence. His tracks like 'Hear The Sound' have become global anthems, characterized by their high speed, heavy kicks, and undeniable rave energy.",
+    "soundcloud": "https://soundcloud.com/franck_music"
+  },
+  "Mija": {
+    "bio": "Mija is one of electronic music’s most eclectic and genre-defying artists. From house to bass, indie to techno, her sets are a journey through her diverse musical taste, always delivered with a focus on 'no labels' and pure creativity.",
+    "soundcloud": "https://soundcloud.com/hi_mija"
+  },
+  "Ollie Lishman": {
+    "bio": "Naarm-based Ollie Lishman is a specialist in the 'hot house' sound—a dynamic fusion of 90s hard house, techno, and trance. His high-impact energy and versatility have made him a rising star in the global club circuit.",
+    "soundcloud": "https://soundcloud.com/ollielishman"
+  },
+  "Øslo": {
+    "bio": "Øslo is known for a bouncy, high-energy take on hard techno. His sets are characterized by fast transitions and an infectious rave energy that keeps the dance floor in constant motion.",
+    "soundcloud": "https://soundcloud.com/oslomusic"
+  },
+  "DJ Kinner": {
+    "bio": "DJ Kinner is a talented voice in the Colombian hard techno scene. Known for his dedication to the underground sound, his sets are powerful, raw, and deeply rooted in the local rave culture.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "SAI": {
+    "bio": "SAI is a Colombian artist known for his industrial and experimental techno approach. His sets at Baum and local venues highlight his focus on the darker, machine-driven side of the electronic spectrum.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  },
+  "NORO$T": {
+    "bio": "NORO$T represents the industrial and experimental edge of the Bogotá scene. His sound is visceral and unyielding, exploring the boundaries of techno and industrial noise in a raw, club-focused context.",
+    "soundcloud": "https://soundcloud.com/sinner_borgia/sets/baum-26"
+  }
+};
+
+// Bio helper
+function getBio(name){
+  const clean = name.split(' B2B ')[0].split(' F2F ')[0].split(' (')[0].trim();
+  return ARTIST_DATA[clean]?.bio || "Emerging talent in the electronic scene, known for their unique energy and contribution to the festival's diverse soundscape.";
+}
+function getSC(name){
+  const clean = name.split(' B2B ')[0].split(' F2F ')[0].split(' (')[0].trim();
+  // Si tenemos un set específico curado en ARTIST_DATA, lo usamos.
+  // De lo contrario, usamos la playlist general del usuario.
+  return ARTIST_DATA[clean]?.soundcloud || "https://soundcloud.com/sinner_borgia/sets/baum-26";
+}
+
 let uid=0;
 // Construye el estado original: cada artista tiene escenario de origen y slot (null = sin asignar)
 function buildInitial(){
@@ -349,7 +837,7 @@ function buildInitial(){
     out[day]=[];
     for(const s of STAGES)
       for(const name of INITIAL[day][s.id])
-        out[day].push({id:'a'+(uid++),name,stage:s.id,slot:null});
+        out[day].push({id:'a'+(uid++),name,stage:s.id,slot:null,bio:getBio(name),soundcloud:getSC(name)});
   }
   return out;
 }
@@ -393,7 +881,11 @@ function loadState(){
         for(const s of STAGES)
           if(!state.lineup[d].some(a=>a.stage===s.id))
             for(const name of INITIAL[d][s.id]||[])
-              state.lineup[d].push({id:'a'+(uid++),name,stage:s.id,slot:null});
+              state.lineup[d].push({id:'a'+(uid++),name,stage:s.id,slot:null,bio:getBio(name)});
+      // Asegura que todos tengan bio (migración)
+      for(const d of ['22','23'])
+        for(const a of state.lineup[d])
+          if(!a.bio) a.bio = getBio(a.name);
       // ruta de baile (puede no existir en archivos viejos)
       if(obj.route&&typeof obj.route==='object')
         state.route={'22':obj.route['22']||{},'23':obj.route['23']||{}};
@@ -456,7 +948,7 @@ function addArtist(){
   const map={'1':'baum','2':'stamm','3':'paramo','4':'ra','5':'todalanoche'};
   const stage=map[(choice||'').trim()];
   if(!stage){alert('Escenario no válido.');return;}
-  curList().push({id:'a'+(uid++),name:name.trim(),stage,slot:null});
+  curList().push({id:'a'+(uid++),name:name.trim(),stage,slot:null,bio:getBio(name.trim())});
   dirty=true;render();
 }
 function clearGrid(){
@@ -484,7 +976,6 @@ const poolEl=document.getElementById('pool');
 const poolWrap=document.getElementById('poolWrap');
 const poolCountEl=document.getElementById('poolCount');
 const gridEl=document.getElementById('grid');
-const searchEl=document.getElementById('search');
 const dirtyDot=document.getElementById('dirtyDot');
 const routeBtn=document.getElementById('routeBtn');
 const fabCount=document.getElementById('fabCount');
@@ -501,6 +992,37 @@ function render(){
   routeBtn.querySelector('.lbl').textContent=routeMode?'Ruta ON':'Modo ruta';
   renderPool();
   renderGrid();
+
+  // Actualiza sección de biografía
+  const bioSection=document.getElementById('bioSection');
+  const bioText=document.getElementById('bioText');
+  const bioSC=document.getElementById('bioSC');
+  const sel=selectedId?findArtist(selectedId):null;
+  if(sel){
+    bioSection.style.display='block';
+    bioText.textContent=sel.bio||getBio(sel.name);
+    
+    // SoundCloud
+    if(sel.soundcloud){
+      bioSC.style.display='block';
+      const isGeneral = sel.soundcloud.includes('/sets/baum-26');
+      const encodedUrl = encodeURIComponent(sel.soundcloud);
+      
+      // Título dinámico para el reproductor
+      const title = isGeneral ? 'Playlist Baum 26' : `Set de ${sel.name}`;
+      
+      bioSC.innerHTML = `
+        <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:4px; font-weight:600; text-transform:uppercase;">${title}</div>
+        <iframe width="100%" height="160" scrolling="no" frameborder="no" allow="autoplay" 
+          src="https://w.soundcloud.com/player/?url=${encodedUrl}&color=%23e2473f&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true">
+        </iframe>`;
+    } else {
+      bioSC.style.display='none';
+    }
+  }else{
+    bioSection.style.display='none';
+  }
+
   dirtyDot.style.display=dirty?'inline-flex':'none';
   save();
 }
@@ -514,6 +1036,17 @@ function makeChip(a){
   chip.dataset.id=a.id;
   chip.style.borderLeftColor=s.color;
   chip.style.background=hexToRgba(s.color,.22);
+  // Neon glow effect
+  const isDark = document.documentElement.dataset.theme === 'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.dataset.theme);
+  if(isDark) {
+    chip.style.boxShadow = `0 0 8px ${hexToRgba(s.color, 0.15)}`;
+    chip.addEventListener('mouseenter', () => {
+      chip.style.boxShadow = `0 0 15px ${hexToRgba(s.color, 0.4)}`;
+    });
+    chip.addEventListener('mouseleave', () => {
+      chip.style.boxShadow = `0 0 8px ${hexToRgba(s.color, 0.15)}`;
+    });
+  }
 
   const name=document.createElement('span');
   name.className='chip-name';
@@ -548,14 +1081,12 @@ function makeChip(a){
 
 // --- Panel "Sin asignar", agrupado por escenario ---
 function renderPool(){
-  const q=searchEl.value.trim().toLowerCase();
   poolEl.innerHTML='';
   let total=0;
   for(const s of STAGES){
     const items=curList().filter(a=>!a.slot&&a.stage===s.id);
     total+=items.length;
-    const shown=items.filter(a=>a.name.toLowerCase().includes(q));
-    if(!shown.length)continue;
+    if(!items.length)continue;
     const group=document.createElement('div');
     group.className='pool-group';
     const label=document.createElement('div');
@@ -563,14 +1094,13 @@ function renderPool(){
     label.textContent=s.name;
     label.style.color=s.color;
     group.appendChild(label);
-    shown.forEach(a=>group.appendChild(makeChip(a)));
+    items.forEach(a=>group.appendChild(makeChip(a)));
     poolEl.appendChild(group);
   }
   poolCountEl.textContent=total;
   fabCount.textContent=total;
   if(!poolEl.children.length){
-    const msg=q?'Sin resultados para la búsqueda.':'Todos los artistas están en la grilla 🎉';
-    poolEl.innerHTML='<div class="empty-pool">'+msg+'</div>';
+    poolEl.innerHTML='<div class="empty-pool">Todos los artistas están en la grilla 🎉</div>';
   }
 }
 
@@ -592,6 +1122,12 @@ function renderGrid(){
     h.style.color=s.color;
     h.style.borderTopColor=s.color;
     h.style.background=hexToRgba(s.color,.14);
+    // Neon glow for stage headers
+    const isDark = document.documentElement.dataset.theme === 'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.dataset.theme);
+    if(isDark) {
+      h.style.textShadow = `0 0 10px ${hexToRgba(s.color, 0.6)}`;
+      h.style.boxShadow = `inset 0 0 20px ${hexToRgba(s.color, 0.1)}`;
+    }
     gridEl.appendChild(h);
   }
 
@@ -692,6 +1228,63 @@ function importJSON(file){
     }catch(e){alert('No se pudo leer el archivo JSON.');}
   };
   reader.readAsText(file);
+}
+
+/* ============================================================
+   7.5 EXPORTAR CALENDARIO (.ics)
+   ============================================================ */
+function exportICS(){
+  let ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Baum Festival Stage Organizer//ES',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Baum Festival 2026'
+  ];
+
+  const allArtists = [...state.lineup['22'], ...state.lineup['23']];
+  const assigned = allArtists.filter(a => a.slot);
+
+  if(!assigned.length){
+    alert('No tienes artistas asignados en la grilla.');
+    return;
+  }
+
+  assigned.forEach(a => {
+    // Determinar día base
+    const isDay23 = state.lineup['23'].includes(a);
+    const dayBase = isDay23 ? 23 : 22;
+    
+    // Parsear hora. Si es 00:00 o 01:30, es el día siguiente.
+    const [h, m] = a.slot.time.split(':').map(Number);
+    let day = dayBase;
+    if(h < 12) day += 1; // 00:00 y 01:30 son del día siguiente
+
+    // Inicio: 2026-05-DAY Th:m:00
+    // Fin: 1h 30m después
+    const startDate = new Date(2026, 4, day, h, m, 0); // Mes 4 = Mayo
+    const endDate = new Date(startDate.getTime() + 90 * 60 * 1000);
+
+    const formatICSDate = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    
+    const stage = STAGE_BY_ID[a.slot.stage]?.name || 'Escenario';
+
+    ics.push('BEGIN:VEVENT');
+    ics.push(`UID:${a.id}-${startDate.getTime()}@baum.fest`);
+    ics.push(`DTSTAMP:${formatICSDate(new Date())}`);
+    ics.push(`DTSTART:${formatICSDate(startDate)}`);
+    ics.push(`DTEND:${formatICSDate(endDate)}`);
+    ics.push(`SUMMARY:${a.name}`);
+    ics.push(`LOCATION:Corferias, Bogotá - Stage ${stage}`);
+    ics.push(`DESCRIPTION:Set en Baum Festival 2026. Escenario: ${stage}`);
+    ics.push('END:VEVENT');
+  });
+
+  ics.push('END:VCALENDAR');
+  
+  const blob = new Blob([ics.join('\r\n')], {type: 'text/calendar;charset=utf-8'});
+  downloadBlob(blob, 'baum-festival-2026.ics');
 }
 
 /* ============================================================
@@ -951,6 +1544,132 @@ async function shareRouteImage(){
   },'image/png');
 }
 
+// --- Imagen vertical 9:16 para Instagram Stories ---
+async function shareStoriesImage(){
+  const day = state.day;
+  const stops = routeTimes(day);
+  
+  // Si no hay ruta, usamos todos los artistas asignados en la grilla para ese día
+  let items = [];
+  if(stops.length) {
+    items = stops.map(t => {
+      const stageId = state.route[day][t.key];
+      const stage = STAGE_BY_ID[stageId];
+      const arts = curList().filter(a => a.slot && a.slot.stage === stageId && a.slot.time === t.key);
+      return {
+        time: t.label,
+        stage: stage,
+        artist: arts.length ? arts.map(a => a.name).join(' & ') : '—'
+      };
+    });
+  } else {
+    // Fallback: mostrar lo que haya en la grilla ordenado por tiempo
+    const assigned = curList().filter(a => a.slot).sort((a,b) => {
+      const ta = TIMES.findIndex(t => t.key === a.slot.time);
+      const tb = TIMES.findIndex(t => t.key === b.slot.time);
+      return ta - tb;
+    });
+    if(!assigned.length) {
+      alert('Tu itinerario está vacío. Agrega artistas a la grilla o marca tu ruta.');
+      return;
+    }
+    items = assigned.map(a => ({
+      time: TIMES.find(t => t.key === a.slot.time).label,
+      stage: STAGE_BY_ID[a.slot.stage],
+      artist: a.name
+    }));
+  }
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1920;
+  canvas.width = W; canvas.height = H;
+
+  // 1. Fondo Gradiente Oscuro
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0, '#1a1a2e');
+  grad.addColorStop(1, '#0f0f1a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  // Decoración: Círculos desenfocados
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = '#5b62e0';
+  ctx.beginPath(); ctx.arc(W, 0, 400, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#e2473f';
+  ctx.beginPath(); ctx.arc(0, H, 500, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1.0;
+
+  // 2. Encabezado
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 80px -apple-system, system-ui, sans-serif';
+  ctx.fillText('BAUM FESTIVAL', W/2, 220);
+  
+  ctx.font = '40px -apple-system, system-ui, sans-serif';
+  ctx.fillStyle = '#8a8a95';
+  ctx.fillText('EDICIÓN 11 · CORFERIAS', W/2, 280);
+
+  ctx.font = 'bold 50px -apple-system, system-ui, sans-serif';
+  ctx.fillStyle = '#7c84f0';
+  ctx.fillText(day === '22' ? 'VIERNES 22 MAYO' : 'SÁBADO 23 MAYO', W/2, 360);
+
+  // Línea divisoria
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(150, 420); ctx.lineTo(W-150, 420); ctx.stroke();
+
+  // 3. Lista de Artistas / Itinerario
+  const startY = 520;
+  const itemH = 160;
+  const maxItems = 8;
+  
+  items.slice(0, maxItems).forEach((item, i) => {
+    const y = startY + i * itemH;
+    const col = item.stage ? item.stage.color : '#ffffff';
+
+    // Hora
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 32px monospace';
+    ctx.fillStyle = '#8a8a95';
+    ctx.fillText(item.time.split(' – ')[0], 120, y);
+
+    // Escenario
+    ctx.font = 'bold 24px -apple-system, system-ui, sans-serif';
+    ctx.fillStyle = col;
+    ctx.fillText(item.stage?.name.toUpperCase() || 'STAGE', 120, y + 40);
+
+    // Artista
+    ctx.font = 'bold 54px -apple-system, system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    // Truncar nombre si es muy largo
+    let name = item.artist;
+    if(ctx.measureText(name).width > 700) {
+      while(ctx.measureText(name + '...').width > 700) name = name.slice(0, -1);
+      name += '...';
+    }
+    ctx.fillText(name, 280, y + 25);
+
+    // Indicador lateral
+    ctx.fillStyle = col;
+    roundRect(ctx, 80, y - 35, 8, 100, 4);
+    ctx.fill();
+  });
+
+  // 4. Pie de página (marca de agua eliminada)
+  ctx.textAlign = 'center';
+
+  // 5. Exportar
+  canvas.toBlob(blob => {
+    const file = new File([blob], `baum-stories-${day}.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:'Mi Ruta Baum'});
+    } else {
+      downloadBlob(blob, file.name);
+    }
+  }, 'image/png');
+}
+
 /* ============================================================
    9. TEMA CLARO / OSCURO
    ============================================================ */
@@ -974,12 +1693,10 @@ document.getElementById('tabs').addEventListener('click',e=>{
   if(!b)return;
   state.day=b.dataset.day;selectedId=null;render();
 });
-searchEl.addEventListener('input',renderPool);
-document.getElementById('addBtn').onclick=addArtist;
-document.getElementById('clearBtn').onclick=clearGrid;
-document.getElementById('resetBtn').onclick=resetAll;
 document.getElementById('exportBtn').onclick=exportJSON;
+document.getElementById('calBtn').onclick=exportICS;
 document.getElementById('shareBtn').onclick=shareImage;
+document.getElementById('storiesBtn').onclick=shareStoriesImage;
 document.getElementById('routeImgBtn').onclick=shareRouteImage;
 document.getElementById('routeBtn').onclick=()=>{
   routeMode=!routeMode;selectedId=null;render();
@@ -1008,6 +1725,50 @@ document.addEventListener('keydown',e=>{
 /* ============================================================
    11. ARRANQUE
    ============================================================ */
+/* ============================================================
+   12. MODAL MAPA
+   ============================================================ */
+const mapModal = document.getElementById('mapModal');
+const mapBtn = document.getElementById('mapBtn');
+const closeMap = document.getElementById('closeMap');
+
+function openMap() {
+  mapModal.style.display = 'flex';
+  setTimeout(() => mapModal.classList.add('open'), 10);
+}
+function closeMapModal() {
+  mapModal.classList.remove('open');
+  setTimeout(() => mapModal.style.display = 'none', 300);
+}
+
+mapBtn.onclick = openMap;
+closeMap.onclick = closeMapModal;
+mapModal.onclick = (e) => { if(e.target === mapModal) closeMapModal(); };
+
+/* ============================================================
+   13. COUNTDOWN TIMER
+   ============================================================ */
+function updateCountdown() {
+  const target = new Date('2026-05-22T15:00:00-05:00').getTime();
+  const now = new Date().getTime();
+  const diff = target - now;
+
+  const el = document.getElementById('timerText');
+  if (diff <= 0) {
+    el.textContent = "¡EL FESTIVAL HA COMENZADO!";
+    return;
+  }
+
+  const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+  el.textContent = `${d}d ${h}h ${m}m ${s}s`;
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
 initTheme();
 loadState();
 render();
