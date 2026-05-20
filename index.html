@@ -157,73 +157,83 @@ body.panel-hidden aside{display:none;}
 .empty-pool{font-size:12px;color:var(--muted);text-align:center;padding:24px 8px;}
 .hint{font-size:11px;color:var(--muted);padding:10px 12px;line-height:1.5;border-top:1px solid var(--border);}
 
-/* ====================== CHIPS ====================== */
-.chip.selected{background:var(--accent-low) !important; outline:2px solid var(--accent); outline-offset:2px;}
-.chip.selected .chip-name{font-weight:700;}
-.chip{
-  position:relative;display:flex;align-items:center;gap:6px;
+/* ====================== TILES DE ARTISTA ====================== */
+.chip.tile{
+  position:relative;display:flex;flex-direction:column;justify-content:flex-start;
   border:1px solid var(--border);border-left:3px solid #888;
-  border-radius:7px;padding:6px 8px;margin-bottom:5px;
-  font-size:12.5px;line-height:1.3;
-  cursor:grab;user-select:none;
-  transition:all 0.2s ease;
+  border-radius:7px;
+  padding:5px 8px;
+  margin:2px;
+  font-size:12.5px;line-height:1.25;
+  cursor:pointer;user-select:none;
+  overflow:hidden;
+  transition:filter 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
-.chip:hover{filter:brightness(1.04);transform:translateX(2px);box-shadow:0 2px 8px var(--shadow);}
-.chip.dragging{opacity:.4;}
-.chip.selected{outline:2px solid var(--accent);outline-offset:1px;box-shadow:0 0 10px var(--accent);}
-.chip-name{flex:1;word-break:break-word;}
-.chip-del{
-  border:0;background:transparent;color:var(--muted);
-  font-size:12px;line-height:1;padding:2px 3px;border-radius:4px;
-  opacity:0;transition:opacity .12s;
-}
-.chip:hover .chip-del{opacity:1;}
-.chip-del:hover{background:rgba(220,60,60,.18);color:#e0483f;}
-@media (hover:none){.chip-del{opacity:.5;}}
+.chip.tile:hover{filter:brightness(1.07);transform:translateY(-1px);box-shadow:0 2px 10px var(--shadow);}
+.chip.tile.selected{outline:2px solid var(--accent);outline-offset:1px;box-shadow:0 0 10px var(--accent);}
+.chip-name{font-weight:600;word-break:break-word;}
+.chip-time{font-size:10.5px;opacity:.7;margin-top:2px;font-variant-numeric:tabular-nums;}
 
-/* ====================== GRILLA ====================== */
-.grid-wrap{flex:1;overflow:auto;padding:14px;}
-.grid{display:grid;gap:0;min-width:760px;}
-.g-corner,.g-head,.g-time,.g-cell{border:1px solid var(--border);}
-.g-corner{
-  position:sticky;top:0;left:0;z-index:4;background:var(--panel);
-  border-top-left-radius:8px;
-}
-.g-head{
-  position:sticky;top:0;z-index:3;
-  padding:11px 8px;text-align:center;font-weight:700;font-size:13px;
-  border-top:3px solid #888;
-  transition:all 0.3s ease;
-}
-.g-time{
-  position:sticky;left:0;z-index:2;background:var(--cell-alt);
-  display:flex;align-items:flex-start;justify-content:center;text-align:center;
-  padding:10px 4px 0;font-size:11px;font-weight:600;line-height:1.45;color:var(--muted);
-}
-.g-cell{
-  position:relative;
-  background:var(--cell);min-height:62px;padding:6px;
-  display:flex;flex-direction:column;
-}
-.g-cell.drop-hover{background:var(--hover);outline:2px dashed var(--accent);outline-offset:-3px;}
-.pool-wrap.drop-hover{outline:2px dashed var(--accent);outline-offset:-4px;border-radius:8px;}
-.g-cell .chip{cursor:grab;}
-
-/* ====================== RUTA DE BAILE ====================== */
-body.route-mode .g-cell{cursor:pointer;}
-body.route-mode .g-cell:hover{background:var(--hover);}
-body.route-mode .chip{cursor:pointer;}
-.g-cell.route-stop{box-shadow:inset 0 0 0 3px var(--stop-color);}
-.g-cell.route-stop::after{
+/* Tile como parada de la ruta */
+.chip.tile.route-stop{box-shadow:inset 0 0 0 2px var(--stop-color), 0 0 14px var(--stop-color);}
+.chip.tile.route-stop::after{
   content:"";position:absolute;inset:0;background:var(--stop-color);
-  opacity:.10;pointer-events:none;
+  opacity:.08;pointer-events:none;border-radius:6px;
 }
 .route-badge{
-  position:absolute;top:4px;right:4px;width:21px;height:21px;
-  border-radius:50%;color:#fff;font-size:11.5px;font-weight:700;
+  position:absolute;top:3px;right:3px;width:20px;height:20px;
+  border-radius:50%;color:#fff;font-size:11px;font-weight:700;
   display:flex;align-items:center;justify-content:center;z-index:2;
   box-shadow:0 1px 3px rgba(0,0,0,.4);
 }
+
+/* Item del resumen de ruta en el panel lateral */
+.route-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;margin-bottom:6px;
+  background:var(--cell);border:1px solid var(--border);
+  border-left:3px solid #888;border-radius:7px;
+  cursor:pointer;transition:filter .15s ease;
+}
+.route-item:hover{filter:brightness(1.06);}
+.route-item .route-num{
+  flex-shrink:0;width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:12px;font-weight:700;
+}
+.route-item .route-info{min-width:0;flex:1;}
+.route-item .route-name{font-size:13px;font-weight:600;word-break:break-word;}
+.route-item .route-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ====================== GRILLA ====================== */
+.grid-wrap{flex:1;overflow:auto;padding:14px;}
+.grid{display:grid;gap:0;min-width:760px;position:relative;}
+.g-corner,.g-head{border:1px solid var(--border);}
+.g-corner{
+  position:sticky;top:0;left:0;z-index:5;background:var(--panel);
+  border-top-left-radius:8px;
+}
+.g-head{
+  position:sticky;top:0;z-index:4;
+  padding:11px 8px;text-align:center;font-weight:700;font-size:13px;
+  border-top:3px solid #888;
+  transition:all 0.3s ease;
+  display:flex;align-items:center;justify-content:center;
+}
+.g-time{
+  position:sticky;left:0;z-index:3;background:var(--cell-alt);
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:4px 4px 0;font-size:11px;font-weight:600;line-height:1;color:var(--muted);
+  border-top:1px solid var(--border);
+  font-variant-numeric:tabular-nums;
+}
+.g-stage-bg{
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+body.route-mode .chip.tile{cursor:pointer;}
+body.route-mode .chip.tile:not(.route-stop):hover{outline:2px dashed var(--accent);outline-offset:-2px;}
 #routeBanner{
   display:none;margin-bottom:12px;padding:9px 12px;border-radius:8px;
   background:var(--hover);border:1px solid var(--accent);
@@ -407,29 +417,28 @@ body.route-mode #routeBanner{display:block;}
       <div id="bioSC" class="bio-sc-wrap"></div>
     </div>
     <div class="pool-meta">
-      <span>Sin asignar</span><span id="poolCount">0</span>
+      <span>Tu ruta</span><span id="poolCount">0</span>
     </div>
     <div class="pool-wrap" id="poolWrap">
       <div id="pool"></div>
     </div>
     <div class="hint">
-      Arrastra los artistas a la grilla, o <b>toca un artista</b> para seleccionarlo
-      y luego toca la celda destino. Toca un espacio vacío del panel para devolverlo.
-      <br><br>Activa <b>🕒 Modo ruta</b> para trazar tu recorrido de la noche y
-      descargarlo con <b>🗺️ Mi ruta PNG</b>.
+      <b>Horarios oficiales del festival.</b> Toca un set para leer la bio y oír el SoundCloud.
+      <br><br>Activa <b>🕒 Modo ruta</b> y toca los sets que quieres ver — se numeran en orden cronológico.
+      Descarga tu plan con <b>🗺️ Mi ruta PNG</b> o <b>📅 Calendario</b>.
     </div>
   </aside>
 
   <section class="grid-wrap">
-    <div id="routeBanner">🕒 Modo ruta activo — toca celdas de la grilla para marcar tu recorrido. Se numeran en orden cronológico; toca de nuevo para quitar una parada.</div>
+    <div id="routeBanner">🕒 Modo ruta activo — toca los sets que quieres ver. Se numeran en orden cronológico; toca de nuevo para quitar uno.</div>
     <div class="grid" id="grid"></div>
   </section>
 </main>
 
 <!-- Cajón móvil: backdrop + botón flotante -->
 <div class="scrim" id="scrim"></div>
-<button id="poolFab" title="Abrir artistas sin asignar">
-  ＋ <span class="fab-count" id="fabCount">0</span> sin asignar
+<button id="poolFab" title="Ver mi ruta de baile">
+  🕒 <span class="fab-count" id="fabCount">0</span> en mi ruta
 </button>
 
 <div id="mapModal" class="modal">
@@ -454,33 +463,130 @@ const STAGES=[
   {id:'todalanoche', name:'todalanoche',  color:'#8b6cf0'}
 ];
 const STAGE_BY_ID=Object.fromEntries(STAGES.map(s=>[s.id,s]));
-// Bloques de 1:30 h, de 15:00 a 03:00 (key = identificador estable, label = lo que se ve)
-const TIMES=[
-  {key:'15:00',label:'15:00 – 16:30'},
-  {key:'16:30',label:'16:30 – 18:00'},
-  {key:'18:00',label:'18:00 – 19:30'},
-  {key:'19:30',label:'19:30 – 21:00'},
-  {key:'21:00',label:'21:00 – 22:30'},
-  {key:'22:30',label:'22:30 – 00:00'},
-  {key:'00:00',label:'00:00 – 01:30'},
-  {key:'01:30',label:'01:30 – 03:00'}
-];
 
-// Lineup original por día y escenario
-const INITIAL={
-  '22':{
-    baum:['6EJOU B2B SNTS','Aleja Vargas','Barbara Lago','Dollhouse','MJ','Noise Mafia','Novah','Pawlowski'],
-    stamm:['Cassian','Disclosure (DJ Set)','Joseph Capriati','Pablo Romero','Richie Hawtin'],
-    paramo:['Alba Franch B2B Helena Lauwaert','DJ Cringey','Emilija','MALUGI','ØTTA','Pegassi','Supergloss','Younglolo'],
-    ra:['Adiel B2B Quest','Boys Noize','Estella Boersma','Helena Hauff','ISAbella','Loumie','Lovefoxy'],
-    todalanoche:['BIIA','Cera Khin','Johannes Schuster','KUKO','LESSSS','Onlynumbers','Praxys (Live)']
+// ====== TIMELINE ======
+// Línea de tiempo continua: bloques de 15 min desde 15:00 hasta 03:00 del día siguiente.
+const DAY_START_MIN = 15*60;     // 15:00 en minutos absolutos
+const DAY_END_MIN   = 27*60;     // 03:00 del día siguiente (15:00 + 12h)
+const BLOCK_MIN     = 15;        // 15 minutos por bloque
+const TOTAL_BLOCKS  = (DAY_END_MIN - DAY_START_MIN) / BLOCK_MIN; // 48
+
+// Convierte "HH:MM" -> minutos desde 15:00. Si HH < 12 se entiende como madrugada.
+function timeToMin(t){
+  const [h,m] = t.split(':').map(Number);
+  const abs = (h < 12 ? h + 24 : h) * 60 + m;
+  return abs - DAY_START_MIN;
+}
+function minToBlock(min){ return Math.round(min / BLOCK_MIN); }
+
+// Etiquetas de hora (cada hora del eje vertical)
+const HOUR_LABELS = [];
+for(let h = 0; h <= 12; h++){
+  const real = (15 + h) % 24;
+  HOUR_LABELS.push({
+    label: String(real).padStart(2,'0') + ':00',
+    block: h * 4   // 0, 4, 8, ... 48
+  });
+}
+
+// ====== HORARIOS REALES BAUM FESTIVAL 11 ======
+const SCHEDULE = {
+  '22': {
+    stamm: [
+      {name:'Julián Gómez',          start:'17:30', end:'18:30'},
+      {name:'Pablo Romero',          start:'18:30', end:'20:00'},
+      {name:'Cassian',               start:'20:00', end:'21:30'},
+      {name:'Disclosure (DJ Set)',   start:'21:30', end:'23:00'},
+      {name:'Joseph Capriati',       start:'23:00', end:'01:00'},
+      {name:'Richie Hawtin',         start:'01:00', end:'03:00'}
+    ],
+    baum: [
+      {name:'MJ',                    start:'16:00', end:'17:00'},
+      {name:'Aleja Vargas',          start:'17:00', end:'18:00'},
+      {name:'Dollhouse',             start:'18:00', end:'19:30'},
+      {name:'Barbara Lago',          start:'19:30', end:'21:00'},
+      {name:'Noise Mafia',           start:'21:00', end:'22:30'},
+      {name:'Pawlowski',             start:'22:30', end:'00:00'},
+      {name:'Novah',                 start:'00:00', end:'01:30'},
+      {name:'6EJOU B2B SNTS',        start:'01:30', end:'03:00'}
+    ],
+    paramo: [
+      {name:'Younglolo',                       start:'15:30', end:'16:30'},
+      {name:'DJ Cringey',                      start:'16:30', end:'18:00'},
+      {name:'Alba Franch B2B Helena Lauwaert', start:'18:00', end:'19:30'},
+      {name:'Emilija',                         start:'19:30', end:'21:00'},
+      {name:'Supergloss',                      start:'21:00', end:'22:30'},
+      {name:'MALUGI',                          start:'22:30', end:'00:00'},
+      {name:'ØTTA',                            start:'00:00', end:'01:30'},
+      {name:'Pegassi',                         start:'01:30', end:'03:00'}
+    ],
+    ra: [
+      {name:'Loumie',                start:'17:00', end:'18:00'},
+      {name:'Lovefoxy',              start:'18:00', end:'19:30'},
+      {name:'ISAbella',              start:'19:30', end:'21:00'},
+      {name:'Adiel B2B Quest',       start:'21:00', end:'22:30'},
+      {name:'Estella Boersma',       start:'22:30', end:'00:00'},
+      {name:'Boys Noize',            start:'00:00', end:'01:30'},
+      {name:'Helena Hauff',          start:'01:30', end:'03:00'}
+    ],
+    todalanoche: [
+      {name:'Praxys (Live)',         start:'17:00', end:'18:00'},
+      {name:'Johannes Schuster',     start:'18:00', end:'19:30'},
+      {name:'BIIA',                  start:'19:30', end:'21:00'},
+      {name:'Cera Khin',             start:'21:00', end:'22:30'},
+      {name:'KUKO',                  start:'22:30', end:'00:00'},
+      {name:'LESSSS',                start:'00:00', end:'01:30'},
+      {name:'Onlynumbers',           start:'01:30', end:'03:00'}
+    ]
   },
-  '23':{
-    baum:['Andres Campo','Felinah','Fenrick','Serafina','Shoki287','Sguzr B2B No One','Vini Vici'],
-    stamm:['Elderbrook (DJ Set)','Emilio Mustafá','Felipe Gordon','Nina Kraviz','PAN-POT','Underworld (Live)'],
-    paramo:['Agoria','Avalon Emerson','Brenda','Mall Grab','Nick León','Nicola Cruz','Nyksan','Paul Oakenfold'],
-    ra:['Alarico B2B Yanamaste','ANNĒ B2B SHDW','DJ Rush','EV-1','Philippa Pacho','Planetary Assault Systems (Live)','Thelma','ÜBERKIKZ B2B Felicie'],
-    todalanoche:['Adrián Mills F2F Serafina','Davyboi F2F Parfait','Florian Picasso F2F Alex Nantaya','Franck F2F Fenrick','KUKO F2F Johannes Schuster','Mija F2F Ollie Lishman','Øslo F2F DJ Kinner','SAI F2F NORO$T']
+  '23': {
+    stamm: [
+      {name:'Emilio Mustafá',        start:'17:00', end:'18:30'},
+      {name:'Felipe Gordon',         start:'18:30', end:'20:00'},
+      {name:'Elderbrook (DJ Set)',   start:'20:00', end:'21:30'},
+      {name:'PAN-POT',               start:'21:30', end:'23:00'},
+      {name:'Underworld (Live)',     start:'23:25', end:'00:55'},
+      {name:'Nina Kraviz',           start:'01:10', end:'03:00'}
+    ],
+    baum: [
+      {name:'Felinah',               start:'16:00', end:'17:30'},
+      {name:'Sguzr B2B No One',      start:'17:30', end:'19:30'},
+      {name:'Shoki287',              start:'19:30', end:'21:00'},
+      {name:'Fenrick',               start:'21:00', end:'22:30'},
+      {name:'Serafina',              start:'22:30', end:'00:00'},
+      {name:'Andres Campo',          start:'00:00', end:'01:30'},
+      {name:'Vini Vici',             start:'01:30', end:'03:00'}
+    ],
+    paramo: [
+      {name:'Nyksan',                start:'16:00', end:'17:00'},
+      {name:'Brenda',                start:'17:00', end:'18:00'},
+      {name:'Nick León',             start:'18:00', end:'19:30'},
+      {name:'Nicola Cruz',           start:'19:30', end:'21:00'},
+      {name:'Avalon Emerson',        start:'21:00', end:'22:30'},
+      {name:'Mall Grab',             start:'22:30', end:'00:00'},
+      {name:'Agoria',                start:'00:00', end:'01:30'},
+      {name:'Paul Oakenfold',        start:'01:30', end:'03:00'}
+    ],
+    ra: [
+      {name:'EV-1',                              start:'16:00', end:'17:00'},
+      {name:'Thelma',                            start:'17:00', end:'18:15'},
+      {name:'Philippa Pacho',                    start:'18:15', end:'19:45'},
+      {name:'ÜBERKIKZ B2B Felicie',              start:'19:45', end:'21:15'},
+      {name:'ANNĒ B2B SHDW',                     start:'21:15', end:'22:45'},
+      {name:'Alarico B2B Yanamaste',             start:'22:45', end:'00:15'},
+      {name:'DJ Rush',                           start:'00:15', end:'01:45'},
+      {name:'Planetary Assault Systems (Live)',  start:'01:45', end:'03:00'}
+    ],
+    todalanoche: [
+      {name:'SAI F2F NORO$T',                  start:'15:00', end:'16:30'},
+      {name:'Øslo F2F DJ Kinner',              start:'16:30', end:'18:00'},
+      {name:'Florian Picasso F2F Alex Nantaya',start:'18:00', end:'19:30'},
+      {name:'Mija F2F Ollie Lishman',          start:'19:30', end:'21:00'},
+      {name:'Davyboi F2F Parfait',             start:'21:00', end:'22:30'},
+      {name:'KUKO F2F Johannes Schuster',      start:'22:30', end:'00:00'},
+      {name:'Franck F2F Fenrick',              start:'00:00', end:'01:30'},
+      {name:'Adrián Mills F2F Serafina',       start:'01:30', end:'03:00'}
+    ]
   }
 };
 
@@ -832,71 +938,65 @@ function getSC(name){
   return ARTIST_DATA[clean]?.soundcloud || "https://soundcloud.com/sinner_borgia/sets/baum-26";
 }
 
-let uid=0;
-// Construye el estado original: cada artista tiene escenario de origen y slot (null = sin asignar)
+// ID estable por artista: día-escenario-inicio
+function makeArtistId(day, stage, start){
+  return `${day}-${stage}-${start.replace(':','')}`;
+}
+
+// Construye el estado original a partir de los horarios fijos publicados.
 function buildInitial(){
   const out={};
   for(const day of ['22','23']){
     out[day]=[];
-    for(const s of STAGES)
-      for(const name of INITIAL[day][s.id])
-        out[day].push({id:'a'+(uid++),name,stage:s.id,slot:null,bio:getBio(name),soundcloud:getSC(name)});
+    for(const s of STAGES){
+      const sets = (SCHEDULE[day] && SCHEDULE[day][s.id]) || [];
+      for(const item of sets){
+        const startMin = timeToMin(item.start);
+        const endMin   = timeToMin(item.end);
+        out[day].push({
+          id: makeArtistId(day, s.id, item.start),
+          name: item.name,
+          stage: s.id,
+          start: item.start,
+          end: item.end,
+          startBlock: minToBlock(startMin),
+          durationBlocks: Math.max(1, minToBlock(endMin - startMin)),
+          bio: getBio(item.name),
+          soundcloud: getSC(item.name)
+        });
+      }
+    }
   }
   return out;
 }
 
-const LS_KEY='baum-lineup-v1';
-// route: por día, un mapa { horario -> escenario } = tu recorrido de la noche
-let state={day:'22',lineup:buildInitial(),route:{'22':{},'23':{}}};
+const LS_KEY='baum-lineup-v2';   // v2: horarios fijos, ruta por artista
+// route: por día, un set (serializado como array) de IDs de artista en tu recorrido
+let state={day:'22',lineup:buildInitial(),route:{'22':[],'23':[]}};
 let dirty=false;        // hay cambios desde la última exportación
-let selectedId=null;    // artista seleccionado por toque (fallback táctil)
-let routeMode=false;    // modo "ruta de baile": clic en celda = marcar parada
+let selectedId=null;    // artista seleccionado (muestra bio en el panel)
+let routeMode=false;    // modo "ruta de baile": clic en chip = añadir/quitar parada
 
 /* ============================================================
    2. PERSISTENCIA (localStorage)
    ============================================================ */
 function save(){
-  localStorage.setItem(LS_KEY,JSON.stringify({day:state.day,lineup:state.lineup,route:state.route}));
+  localStorage.setItem(LS_KEY,JSON.stringify({day:state.day,route:state.route}));
 }
 function loadState(){
   try{
     const raw=localStorage.getItem(LS_KEY);
     if(!raw)return;
     const obj=JSON.parse(raw);
-    if(obj&&obj.lineup&&Array.isArray(obj.lineup['22'])&&Array.isArray(obj.lineup['23'])){
-      state.lineup=obj.lineup;
-      state.day=(obj.day==='23')?'23':'22';
-      // migración: artistas con horario antiguo (que ya no existe) vuelven al panel
-      const validTimes=new Set(TIMES.map(t=>t.key));
-      for(const d of ['22','23'])
-        for(const a of state.lineup[d])
-          if(a.slot&&!validTimes.has(a.slot.time))a.slot=null;
-      // mantiene el contador de ids por encima de los existentes
-      let max=0;
-      for(const d of ['22','23'])
-        for(const a of state.lineup[d]){
-          const n=parseInt(String(a.id).replace(/\D/g,''),10);
-          if(!isNaN(n)&&n>max)max=n;
-        }
-      uid=max+1;
-      // migración: añade artistas de escenarios nuevos que falten en estados guardados
-      for(const d of ['22','23'])
-        for(const s of STAGES)
-          if(!state.lineup[d].some(a=>a.stage===s.id))
-            for(const name of INITIAL[d][s.id]||[])
-              state.lineup[d].push({id:'a'+(uid++),name,stage:s.id,slot:null,bio:getBio(name),soundcloud:getSC(name)});
-      // Asegura que todos tengan bio y soundcloud (migración)
-      for(const d of ['22','23'])
-        for(const a of state.lineup[d]){
-          if(!a.bio) a.bio = getBio(a.name);
-          if(!a.soundcloud) a.soundcloud = getSC(a.name);
-        }
-      // ruta de baile (puede no existir en archivos viejos)
-      if(obj.route&&typeof obj.route==='object')
-        state.route={'22':obj.route['22']||{},'23':obj.route['23']||{}};
-      for(const d of ['22','23'])
-        for(const tk of Object.keys(state.route[d]))
-          if(!validTimes.has(tk))delete state.route[d][tk];
+    if(!obj) return;
+    if(obj.day==='22'||obj.day==='23') state.day=obj.day;
+    // route: array de IDs por día. Filtra IDs ya inexistentes.
+    if(obj.route && typeof obj.route==='object'){
+      for(const d of ['22','23']){
+        const valid = new Set(state.lineup[d].map(a=>a.id));
+        const arr = Array.isArray(obj.route[d]) ? obj.route[d] : [];
+        state.route[d] = arr.filter(id => valid.has(id));
+      }
     }
   }catch(e){/* estado corrupto: se ignora */}
 }
@@ -912,65 +1012,33 @@ function findArtist(id){
   }
   return null;
 }
-function artistsInCell(stageId,time){
-  return curList().filter(a=>a.slot&&a.slot.stage===stageId&&a.slot.time===time);
-}
-// Horarios marcados como ruta, en orden cronológico
-function routeTimes(day){
-  return TIMES.filter(t=>state.route[day]&&state.route[day][t.key]);
+// Artistas de la ruta del día activo, en orden cronológico
+function routeArtists(day){
+  const ids = state.route[day] || [];
+  return ids.map(id => state.lineup[day].find(a => a.id === id))
+            .filter(Boolean)
+            .sort((a,b) => a.startBlock - b.startBlock);
 }
 function hexToRgba(hex,alpha){
   const h=hex.replace('#','');
   const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);
   return `rgba(${r},${g},${b},${alpha})`;
 }
-function clearHovers(){
-  document.querySelectorAll('.drop-hover').forEach(el=>el.classList.remove('drop-hover'));
-}
 
 /* ============================================================
    4. MUTACIONES DE ESTADO
    ============================================================ */
-function moveArtist(id,slot){
-  const a=findArtist(id);
-  if(!a)return;
-  a.slot=slot;          // slot=null -> vuelve al panel, conserva su escenario de origen
-  dirty=true;
-  render();
-}
-function deleteArtist(id){
-  for(const d of ['22','23']){
-    const i=state.lineup[d].findIndex(x=>x.id===id);
-    if(i>=0){state.lineup[d].splice(i,1);break;}
-  }
-  if(selectedId===id)selectedId=null;
-  dirty=true;render();
-}
-function addArtist(){
-  const name=prompt('Nombre del artista:');
-  if(!name||!name.trim())return;
-  const choice=prompt('Escenario:\n  1 = BAUM\n  2 = Stamm\n  3 = Páramo\n  4 = RA\n  5 = todalanoche','1');
-  const map={'1':'baum','2':'stamm','3':'paramo','4':'ra','5':'todalanoche'};
-  const stage=map[(choice||'').trim()];
-  if(!stage){alert('Escenario no válido.');return;}
-  curList().push({id:'a'+(uid++),name:name.trim(),stage,slot:null,bio:getBio(name.trim())});
-  dirty=true;render();
-}
-function clearGrid(){
-  curList().forEach(a=>a.slot=null);
-  dirty=true;render();
-}
 function resetAll(){
-  if(!confirm('¿Restaurar el lineup original de ambos días? Se perderán todos los cambios.'))return;
-  state.lineup=buildInitial();
-  state.route={'22':{},'23':{}};
+  if(!confirm('¿Borrar tu ruta de baile de ambos días?'))return;
+  state.route={'22':[],'23':[]};
   selectedId=null;dirty=true;render();
 }
-// Marca / mueve / quita una parada de la ruta (una sola por bloque de horario)
-function toggleRoute(stage,time){
-  const r=state.route[state.day];
-  if(r[time]===stage)delete r[time];   // mismo escenario -> quitar parada
-  else r[time]=stage;                  // marcar o mover la parada del bloque
+// Añade / quita un artista de la ruta del día actual
+function toggleRoute(artistId){
+  const arr = state.route[state.day];
+  const i = arr.indexOf(artistId);
+  if(i>=0) arr.splice(i,1);
+  else arr.push(artistId);
   dirty=true;render();
 }
 
@@ -1032,16 +1100,17 @@ function render(){
   save();
 }
 
-// --- Crea un chip de artista (usado en panel y en grilla) ---
-function makeChip(a){
+// --- Crea un tile de artista posicionado en el timeline ---
+function makeChip(a, routeNumber){
   const s=STAGE_BY_ID[a.stage]||STAGES[0];
   const chip=document.createElement('div');
-  chip.className='chip'+(a.id===selectedId?' selected':'');
-  chip.draggable=!routeMode;
+  chip.className='chip tile'+(a.id===selectedId?' selected':'')+(routeNumber?' route-stop':'');
   chip.dataset.id=a.id;
   chip.style.borderLeftColor=s.color;
   chip.style.background=hexToRgba(s.color,.22);
-  // Neon glow effect
+  chip.style.setProperty('--stop-color', s.color);
+
+  // Glow effect
   const isDark = document.documentElement.dataset.theme === 'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.dataset.theme);
   if(isDark) {
     chip.style.boxShadow = `0 0 8px ${hexToRgba(s.color, 0.15)}`;
@@ -1057,151 +1126,147 @@ function makeChip(a){
   name.className='chip-name';
   name.textContent=a.name;
 
-  const del=document.createElement('button');
-  del.className='chip-del';
-  del.textContent='✕';
-  del.title='Eliminar artista';
+  const time=document.createElement('span');
+  time.className='chip-time';
+  time.textContent=`${a.start} – ${a.end}`;
 
-  chip.append(name,del);
+  chip.append(name,time);
 
-  chip.addEventListener('dragstart',e=>{
-    e.dataTransfer.setData('text/plain',a.id);
-    e.dataTransfer.effectAllowed='move';
-    chip.classList.add('dragging');
-  });
-  chip.addEventListener('dragend',()=>{chip.classList.remove('dragging');clearHovers();});
-  chip.addEventListener('click',e=>{
-    if(e.target===del)return;
-    if(routeMode)return;            // en modo ruta el clic lo gestiona la celda
-    selectedId=(selectedId===a.id)?null:a.id;   // selección por toque
-    if(selectedId)closeDrawer();    // móvil: cierra el cajón para tocar la celda
+  if(routeNumber){
+    const badge=document.createElement('div');
+    badge.className='route-badge';
+    badge.textContent=routeNumber;
+    badge.style.background=s.color;
+    chip.appendChild(badge);
+  }
+
+  chip.addEventListener('click',()=>{
+    if(routeMode){
+      toggleRoute(a.id);
+      return;
+    }
+    selectedId=(selectedId===a.id)?null:a.id;
+    if(selectedId)closeDrawer();
     render();
-  });
-  del.addEventListener('click',e=>{
-    e.stopPropagation();
-    deleteArtist(a.id);
   });
   return chip;
 }
 
-// --- Panel "Sin asignar", agrupado por escenario ---
+// --- Panel "Sin asignar": ya no hay artistas sin asignar; muestra el resumen de tu ruta ---
 function renderPool(){
   poolEl.innerHTML='';
-  let total=0;
-  for(const s of STAGES){
-    const items=curList().filter(a=>!a.slot&&a.stage===s.id);
-    total+=items.length;
-    if(!items.length)continue;
-    const group=document.createElement('div');
-    group.className='pool-group';
-    const label=document.createElement('div');
-    label.className='pool-label';
-    label.textContent=s.name;
-    label.style.color=s.color;
-    group.appendChild(label);
-    items.forEach(a=>group.appendChild(makeChip(a)));
-    poolEl.appendChild(group);
+  const route = routeArtists(state.day);
+  if(!route.length){
+    poolEl.innerHTML='<div class="empty-pool">Activa <b>🕒 Modo ruta</b> y toca los sets que quieres ver. Aparecerán aquí en orden.</div>';
+    poolCountEl.textContent=0;
+    if(fabCount) fabCount.textContent=0;
+    return;
   }
-  poolCountEl.textContent=total;
-  fabCount.textContent=total;
-  if(!poolEl.children.length){
-    poolEl.innerHTML='<div class="empty-pool">Todos los artistas están en la grilla 🎉</div>';
-  }
+  const group=document.createElement('div');
+  group.className='pool-group';
+  const label=document.createElement('div');
+  label.className='pool-label';
+  label.textContent='TU RUTA';
+  label.style.color='var(--accent)';
+  group.appendChild(label);
+  route.forEach((a,i)=>{
+    const item=document.createElement('div');
+    item.className='route-item';
+    const s=STAGE_BY_ID[a.stage];
+    item.style.borderLeftColor=s.color;
+    item.innerHTML=`
+      <div class="route-num" style="background:${s.color}">${i+1}</div>
+      <div class="route-info">
+        <div class="route-name">${a.name}</div>
+        <div class="route-meta"><span style="color:${s.color}">${s.name}</span> · ${a.start}–${a.end}</div>
+      </div>`;
+    item.addEventListener('click',()=>{
+      selectedId=a.id; closeDrawer(); render();
+    });
+    group.appendChild(item);
+  });
+  poolEl.appendChild(group);
+  poolCountEl.textContent=route.length;
+  if(fabCount) fabCount.textContent=route.length;
 }
 
-// --- Grilla principal: escenarios × horarios ---
+// --- Grilla principal: timeline continuo con tiles posicionados por hora real ---
 function renderGrid(){
   gridEl.innerHTML='';
   const mobile=matchMedia('(max-width:720px)').matches;
-  gridEl.style.gridTemplateColumns=
-    `${mobile?72:92}px repeat(${STAGES.length},minmax(${mobile?140:170}px,1fr))`;
+  const blockH = mobile ? 16 : 22;             // alto de cada bloque de 15 min
+  const colMin = mobile ? 120 : 160;
+  gridEl.style.gridTemplateColumns =
+    `${mobile?60:80}px repeat(${STAGES.length}, minmax(${colMin}px, 1fr))`;
+  gridEl.style.gridTemplateRows =
+    `52px repeat(${TOTAL_BLOCKS}, ${blockH}px)`;
+  gridEl.style.setProperty('--block-h', blockH+'px');
 
+  // Esquina
   const corner=document.createElement('div');
   corner.className='g-corner';
   gridEl.appendChild(corner);
 
-  for(const s of STAGES){
+  // Encabezados de escenario
+  const isDark = document.documentElement.dataset.theme === 'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.dataset.theme);
+  STAGES.forEach((s,i)=>{
     const h=document.createElement('div');
     h.className='g-head';
     h.textContent=s.name;
     h.style.color=s.color;
     h.style.borderTopColor=s.color;
     h.style.background=hexToRgba(s.color,.14);
-    // Neon glow for stage headers
-    const isDark = document.documentElement.dataset.theme === 'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.dataset.theme);
-    if(isDark) {
+    h.style.gridColumn = String(i+2);
+    h.style.gridRow = '1';
+    if(isDark){
       h.style.textShadow = `0 0 10px ${hexToRgba(s.color, 0.6)}`;
       h.style.boxShadow = `inset 0 0 20px ${hexToRgba(s.color, 0.1)}`;
     }
     gridEl.appendChild(h);
-  }
+  });
 
-  // numeración de las paradas de la ruta (orden cronológico)
-  const routeNum={};
-  routeTimes(state.day).forEach((t,i)=>routeNum[t.key]=i+1);
-
-  for(const t of TIMES){
+  // Etiquetas de hora en la columna de tiempo
+  HOUR_LABELS.forEach((hl,i)=>{
     const tc=document.createElement('div');
     tc.className='g-time';
-    tc.textContent=t.label;
+    tc.textContent=hl.label;
+    tc.style.gridColumn='1';
+    // Cada etiqueta ocupa 4 filas (1 hora). La última (03:00) sólo 1 fila.
+    const span = (i === HOUR_LABELS.length-1) ? 1 : 4;
+    tc.style.gridRow = `${2 + hl.block} / span ${span}`;
     gridEl.appendChild(tc);
+  });
 
-    for(const s of STAGES){
-      const cell=document.createElement('div');
-      cell.className='g-cell';
-      cell.dataset.stage=s.id;cell.dataset.time=t.key;
-      artistsInCell(s.id,t.key).forEach(a=>cell.appendChild(makeChip(a)));
-      // ¿es una parada de la ruta?
-      if(state.route[state.day][t.key]===s.id){
-        cell.classList.add('route-stop');
-        cell.style.setProperty('--stop-color',s.color);
-        const badge=document.createElement('div');
-        badge.className='route-badge';
-        badge.textContent=routeNum[t.key];
-        badge.style.background=s.color;
-        cell.appendChild(badge);
-      }
-      attachDrop(cell,()=>({stage:s.id,time:t.key}));
-      gridEl.appendChild(cell);
-    }
+  // Fondo de cada escenario (con líneas horarias)
+  STAGES.forEach((s,i)=>{
+    const bg=document.createElement('div');
+    bg.className='g-stage-bg';
+    bg.style.gridColumn = String(i+2);
+    bg.style.gridRow = `2 / span ${TOTAL_BLOCKS}`;
+    bg.style.background = `repeating-linear-gradient(to bottom,
+       var(--cell) 0,
+       var(--cell) ${blockH*4-1}px,
+       var(--border) ${blockH*4-1}px,
+       var(--border) ${blockH*4}px)`;
+    gridEl.appendChild(bg);
+  });
+
+  // Numeración de la ruta (orden cronológico)
+  const routeNum={};
+  routeArtists(state.day).forEach((a,i)=>routeNum[a.id]=i+1);
+
+  // Tiles de artista
+  for(const a of curList()){
+    const stageIdx = STAGES.findIndex(s => s.id === a.stage);
+    if(stageIdx < 0) continue;
+    const tile = makeChip(a, routeNum[a.id]);
+    tile.style.gridColumn = String(stageIdx + 2);
+    const row = 2 + Math.max(0, a.startBlock);
+    const span = Math.max(1, Math.min(a.durationBlocks, TOTAL_BLOCKS - a.startBlock));
+    tile.style.gridRow = `${row} / span ${span}`;
+    gridEl.appendChild(tile);
   }
 }
-
-/* ============================================================
-   6. DRAG & DROP  (+ fallback de toque)
-   ============================================================ */
-function attachDrop(el,slotFn){
-  el.addEventListener('dragover',e=>{
-    e.preventDefault();
-    e.dataTransfer.dropEffect='move';
-    el.classList.add('drop-hover');
-  });
-  el.addEventListener('dragleave',e=>{
-    if(!el.contains(e.relatedTarget))el.classList.remove('drop-hover');
-  });
-  el.addEventListener('drop',e=>{
-    e.preventDefault();
-    el.classList.remove('drop-hover');
-    const id=e.dataTransfer.getData('text/plain');
-    if(id)moveArtist(id,slotFn());
-  });
-  el.addEventListener('click',e=>{
-    const slot=slotFn();
-    // Modo ruta: clic en una celda de la grilla = marca/quita parada
-    if(routeMode){
-      if(slot)toggleRoute(slot.stage,slot.time);
-      return;
-    }
-    // Fallback táctil: con un artista seleccionado, tocar el destino lo coloca
-    if(!selectedId)return;
-    if(e.target.closest('.chip'))return;   // tocar otro chip = seleccionarlo
-    moveArtist(selectedId,slot);
-    selectedId=null;
-  });
-}
-// El panel entero es zona de drop -> devuelve al pool (slot null)
-attachDrop(poolWrap,()=>null);
-document.addEventListener('dragend',clearHovers);
 
 /* ============================================================
    7. EXPORTAR / IMPORTAR
@@ -1215,8 +1280,8 @@ function downloadBlob(blob,name){
 }
 function exportJSON(){
   const data={festival:'Baum Festival 11',exportedAt:new Date().toISOString(),
-              lineup:state.lineup,route:state.route};
-  downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'baum-lineup.json');
+              route:state.route};
+  downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'mi-ruta-baum.json');
   dirty=false;render();
 }
 function importJSON(file){
@@ -1224,10 +1289,12 @@ function importJSON(file){
   reader.onload=()=>{
     try{
       const obj=JSON.parse(reader.result);
-      if(obj&&obj.lineup&&Array.isArray(obj.lineup['22'])&&Array.isArray(obj.lineup['23'])){
-        state.lineup=obj.lineup;
-        state.route=(obj.route&&typeof obj.route==='object')
-          ?{'22':obj.route['22']||{},'23':obj.route['23']||{}}:{'22':{},'23':{}};
+      if(obj && obj.route && typeof obj.route==='object'){
+        for(const d of ['22','23']){
+          const valid = new Set(state.lineup[d].map(a=>a.id));
+          const arr = Array.isArray(obj.route[d]) ? obj.route[d] : [];
+          state.route[d] = arr.filter(id => valid.has(id));
+        }
         selectedId=null;dirty=true;render();
       }else alert('El archivo no tiene un formato válido.');
     }catch(e){alert('No se pudo leer el archivo JSON.');}
@@ -1245,38 +1312,37 @@ function exportICS(){
     'PRODID:-//Baum Festival Stage Organizer//ES',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Baum Festival 2026'
+    'X-WR-CALNAME:Baum Festival 2026 – Mi ruta'
   ];
 
-  const allArtists = [...state.lineup['22'], ...state.lineup['23']];
-  const assigned = allArtists.filter(a => a.slot);
-
-  if(!assigned.length){
-    alert('No tienes artistas asignados en la grilla.');
+  // Sólo exporta los sets que están en tu ruta de baile (ambos días).
+  const items = [];
+  for(const d of ['22','23']){
+    const arts = routeArtists(d);
+    arts.forEach(a => items.push({a, day:d}));
+  }
+  if(!items.length){
+    alert('Tu ruta está vacía.\nActiva «🕒 Modo ruta» y toca los sets que quieres exportar.');
     return;
   }
 
-  assigned.forEach(a => {
-    // Determinar día base
-    const isDay23 = state.lineup['23'].includes(a);
-    const dayBase = isDay23 ? 23 : 22;
-    
-    // Parsear hora. Si es 00:00 o 01:30, es el día siguiente.
-    const [h, m] = a.slot.time.split(':').map(Number);
-    let day = dayBase;
-    if(h < 12) day += 1; // 00:00 y 01:30 son del día siguiente
+  const formatICSDate = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
-    // Inicio: 2026-05-DAY Th:m:00
-    // Fin: 1h 30m después
-    const startDate = new Date(2026, 4, day, h, m, 0); // Mes 4 = Mayo
-    const endDate = new Date(startDate.getTime() + 90 * 60 * 1000);
+  items.forEach(({a, day}) => {
+    const dayBase = day === '23' ? 23 : 22;
+    // Si la hora es < 12 (00:00–11:59), se considera madrugada del día siguiente.
+    const [sh, sm] = a.start.split(':').map(Number);
+    const [eh, em] = a.end.split(':').map(Number);
+    const sDay = sh < 12 ? dayBase + 1 : dayBase;
+    const eDay = eh < 12 ? dayBase + 1 : dayBase;
+    const startDate = new Date(2026, 4, sDay, sh, sm, 0);
+    const endDate   = new Date(2026, 4, eDay, eh, em, 0);
+    // Si por algún motivo el fin queda antes del inicio, suma 1 día.
+    if(endDate <= startDate) endDate.setDate(endDate.getDate()+1);
 
-    const formatICSDate = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    
-    const stage = STAGE_BY_ID[a.slot.stage]?.name || 'Escenario';
-
+    const stage = STAGE_BY_ID[a.stage]?.name || 'Escenario';
     ics.push('BEGIN:VEVENT');
-    ics.push(`UID:${a.id}-${startDate.getTime()}@baum.fest`);
+    ics.push(`UID:${a.id}@baum.fest`);
     ics.push(`DTSTAMP:${formatICSDate(new Date())}`);
     ics.push(`DTSTART:${formatICSDate(startDate)}`);
     ics.push(`DTEND:${formatICSDate(endDate)}`);
@@ -1287,9 +1353,9 @@ function exportICS(){
   });
 
   ics.push('END:VCALENDAR');
-  
+
   const blob = new Blob([ics.join('\r\n')], {type: 'text/calendar;charset=utf-8'});
-  downloadBlob(blob, 'baum-festival-2026.ics');
+  downloadBlob(blob, 'mi-ruta-baum.ics');
 }
 
 /* ============================================================
@@ -1343,115 +1409,124 @@ function wrapTextN(ctx,text,maxW,maxLines){
 async function shareImage(){
   const day=state.day;
   const routeNum={};
-  routeTimes(day).forEach((t,i)=>routeNum[t.key]=i+1);
+  routeArtists(day).forEach((a,i)=>routeNum[a.id]=i+1);
+
   const canvas=document.createElement('canvas');
   const ctx=canvas.getContext('2d');
   const SCALE=2;
-  const PAD=36,TITLE_H=80,HEAD_H=52,TIME_W=104,CELL_W=216;
-  const CELL_PAD=10,CHIP_PADV=7,LINE_H=17,CHIP_GAP=7;
-  const CHIP_FONT='13px -apple-system,Segoe UI,Roboto,sans-serif';
-  const innerW=CELL_W-CELL_PAD*2-16;
+  const PAD=36, TITLE_H=80, HEAD_H=52, TIME_W=80, CELL_W=200;
+  const BLOCK_H=20;     // 20 px por cada 15 min  ->  48 * 20 = 960 px de timeline
+  const CHIP_FONT='600 13px -apple-system,Segoe UI,Roboto,sans-serif';
+  const TIME_FONT='600 11px -apple-system,Segoe UI,Roboto,sans-serif';
+  const innerW=CELL_W-12-16;
 
-  // 1. Mide y precalcula chips + altura de cada fila
-  ctx.font=CHIP_FONT;
-  const cellData={};const rowH=[];
-  for(const t of TIMES){
-    let maxH=46;
-    for(const s of STAGES){
-      const chips=artistsInCell(s.id,t.key).map(a=>{
-        const lines=wrapText(ctx,a.name,innerW);
-        return {lines,h:CHIP_PADV*2+lines.length*LINE_H,color:STAGE_BY_ID[s.id].color};
-      });
-      cellData[s.id+'|'+t.key]=chips;
-      let h=chips.length?CELL_PAD*2:46;
-      chips.forEach((c,i)=>h+=c.h+(i?CHIP_GAP:0));
-      if(h>maxH)maxH=h;
-    }
-    rowH.push(maxH);
-  }
-
-  // 2. Dimensiona el lienzo
-  const gridW=TIME_W+STAGES.length*CELL_W;
+  // Dimensiones del lienzo
+  const gridW=TIME_W + STAGES.length*CELL_W;
+  const gridH=BLOCK_H * TOTAL_BLOCKS;
   const W=PAD*2+gridW;
-  const H=PAD*2+TITLE_H+HEAD_H+rowH.reduce((a,b)=>a+b,0);
-  canvas.width=W*SCALE;canvas.height=H*SCALE;
+  const H=PAD*2+TITLE_H+HEAD_H+gridH;
+  canvas.width=W*SCALE; canvas.height=H*SCALE;
   ctx.scale(SCALE,SCALE);
 
-  // 3. Fondo y título
-  ctx.fillStyle='#16161a';ctx.fillRect(0,0,W,H);
-  ctx.textBaseline='alphabetic';ctx.textAlign='left';
+  // Fondo + título
+  ctx.fillStyle='#16161a'; ctx.fillRect(0,0,W,H);
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left';
   ctx.fillStyle='#ffffff';
   ctx.font='700 26px -apple-system,Segoe UI,Roboto,sans-serif';
-  ctx.fillText('Baum Festival 11',PAD,PAD+30);
+  ctx.fillText('Baum Festival 11', PAD, PAD+30);
   ctx.fillStyle='#8a8a95';
   ctx.font='15px -apple-system,Segoe UI,Roboto,sans-serif';
-  ctx.fillText((day==='22'?'Viernes 22':'Sábado 23')+' de mayo · Corferias, Bogotá',PAD,PAD+55);
+  ctx.fillText((day==='22'?'Viernes 22':'Sábado 23')+' de mayo · Corferias, Bogotá', PAD, PAD+55);
 
-  const gx=PAD,gy=PAD+TITLE_H;
+  const gx=PAD, gy=PAD+TITLE_H;
 
-  // 4. Cabeceras de escenario
+  // Cabeceras de escenario
   ctx.textBaseline='middle';
   STAGES.forEach((s,i)=>{
     const x=gx+TIME_W+i*CELL_W;
-    ctx.fillStyle=hexToRgba(s.color,.18);ctx.fillRect(x,gy,CELL_W,HEAD_H);
-    ctx.fillStyle=s.color;ctx.fillRect(x,gy,CELL_W,3);
+    ctx.fillStyle=hexToRgba(s.color,.18); ctx.fillRect(x,gy,CELL_W,HEAD_H);
+    ctx.fillStyle=s.color; ctx.fillRect(x,gy,CELL_W,3);
     ctx.font='700 15px -apple-system,Segoe UI,Roboto,sans-serif';
     ctx.textAlign='center';
-    ctx.fillText(s.name,x+CELL_W/2,gy+HEAD_H/2+2);
+    ctx.fillText(s.name, x+CELL_W/2, gy+HEAD_H/2+2);
   });
 
-  // 5. Filas: horario + celdas con chips
-  let y=gy+HEAD_H;
-  TIMES.forEach((t,ri)=>{
-    const h=rowH[ri];
-    ctx.fillStyle='#26262e';ctx.fillRect(gx,y,TIME_W,h);
-    ctx.fillStyle='#cfcfd6';ctx.font='600 12px -apple-system,Segoe UI,Roboto,sans-serif';
-    ctx.textAlign='center';ctx.fillText(t.label,gx+TIME_W/2,y+19);
-
-    STAGES.forEach((s,ci)=>{
-      const x=gx+TIME_W+ci*CELL_W;
-      ctx.strokeStyle='#2e2e37';ctx.strokeRect(x+.5,y+.5,CELL_W,h);
-      let cy=y+CELL_PAD;
-      ctx.textAlign='left';
-      for(const c of cellData[s.id+'|'+t.key]){
-        roundRect(ctx,x+CELL_PAD,cy,CELL_W-CELL_PAD*2,c.h,7);
-        ctx.fillStyle=hexToRgba(c.color,.24);ctx.fill();
-        ctx.fillStyle=c.color;ctx.fillRect(x+CELL_PAD,cy,3,c.h);
-        ctx.fillStyle='#ececf0';ctx.font=CHIP_FONT;
-        c.lines.forEach((ln,li)=>
-          ctx.fillText(ln,x+CELL_PAD+12,cy+CHIP_PADV+LINE_H*li+LINE_H/2+1));
-        cy+=c.h+CHIP_GAP;
-      }
-      // resalta la parada de la ruta con su número
-      if(state.route[day][t.key]===s.id){
-        const col=STAGE_BY_ID[s.id].color;
-        ctx.lineWidth=3;ctx.strokeStyle=col;
-        ctx.strokeRect(x+2,y+2,CELL_W-4,h-4);
-        ctx.lineWidth=1;
-        const cr=13,cx=x+CELL_W-cr-7,ccy=y+cr+7;
-        ctx.beginPath();ctx.arc(cx,ccy,cr,0,Math.PI*2);
-        ctx.fillStyle=col;ctx.fill();
-        ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.font='700 13px -apple-system,Segoe UI,Roboto,sans-serif';
-        ctx.fillText(String(routeNum[t.key]),cx,ccy+.5);
-        ctx.textAlign='left';ctx.textBaseline='alphabetic';
-      }
-    });
-    ctx.strokeStyle='#2e2e37';ctx.strokeRect(gx+.5,y+.5,TIME_W,h);
-    y+=h;
+  // Fondo + líneas horarias por escenario
+  const ty=gy+HEAD_H;
+  STAGES.forEach((s,i)=>{
+    const x=gx+TIME_W+i*CELL_W;
+    ctx.fillStyle='#26262e'; ctx.fillRect(x, ty, CELL_W, gridH);
+    ctx.strokeStyle='#2e2e37'; ctx.lineWidth=1;
+    for(let b=0; b<=TOTAL_BLOCKS; b+=4){          // línea cada hora
+      const y=ty+b*BLOCK_H+0.5;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+CELL_W,y); ctx.stroke();
+    }
+    // borde lateral
+    ctx.strokeRect(x+0.5, ty+0.5, CELL_W, gridH);
   });
 
-  // 6. Pie
-  ctx.textAlign='left';ctx.textBaseline='alphabetic';
-  ctx.fillStyle='#5a5a63';ctx.font='12px -apple-system,Segoe UI,Roboto,sans-serif';
-  ctx.fillText('Armado con Baum Festival Stage Organizer',PAD,H-PAD+22);
+  // Columna de horas
+  ctx.fillStyle='#1f1f25'; ctx.fillRect(gx, ty, TIME_W, gridH);
+  ctx.strokeStyle='#2e2e37'; ctx.strokeRect(gx+0.5, ty+0.5, TIME_W, gridH);
+  ctx.fillStyle='#cfcfd6'; ctx.font=TIME_FONT;
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  HOUR_LABELS.forEach(hl=>{
+    ctx.fillText(hl.label, gx+TIME_W/2, ty+hl.block*BLOCK_H+4);
+  });
 
-  // 7. Exporta: comparte si el navegador lo permite, si no descarga
+  // Tiles de artista
+  ctx.textBaseline='alphabetic';
+  for(const a of state.lineup[day]){
+    const stageIdx = STAGES.findIndex(s=>s.id===a.stage);
+    if(stageIdx<0) continue;
+    const s=STAGE_BY_ID[a.stage];
+    const x=gx+TIME_W+stageIdx*CELL_W+8;
+    const y=ty+a.startBlock*BLOCK_H+2;
+    const w=CELL_W-16;
+    const h=a.durationBlocks*BLOCK_H-4;
+
+    // caja
+    roundRect(ctx, x, y, w, h, 7);
+    ctx.fillStyle=hexToRgba(s.color,.28); ctx.fill();
+    ctx.fillStyle=s.color; ctx.fillRect(x, y, 3, h);
+
+    // nombre
+    ctx.fillStyle='#ececf0';
+    ctx.font=CHIP_FONT;
+    ctx.textAlign='left';
+    const lines=wrapText(ctx, a.name, w-18);
+    lines.forEach((ln,li)=>ctx.fillText(ln, x+10, y+16+li*16));
+    // hora
+    ctx.fillStyle='#a9a9b3';
+    ctx.font=TIME_FONT;
+    ctx.fillText(`${a.start} – ${a.end}`, x+10, y+16+lines.length*16+2);
+
+    // si es parada de la ruta, borde + badge
+    if(routeNum[a.id]){
+      ctx.lineWidth=2.5; ctx.strokeStyle=s.color;
+      ctx.strokeRect(x+1, y+1, w-2, h-2);
+      ctx.lineWidth=1;
+      const cr=12, cx=x+w-cr-6, ccy=y+cr+4;
+      ctx.beginPath(); ctx.arc(cx,ccy,cr,0,Math.PI*2);
+      ctx.fillStyle=s.color; ctx.fill();
+      ctx.fillStyle='#fff';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='700 12px -apple-system,Segoe UI,Roboto,sans-serif';
+      ctx.fillText(String(routeNum[a.id]), cx, ccy+0.5);
+      ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+    }
+  }
+
+  // Pie
+  ctx.fillStyle='#5a5a63'; ctx.font='12px -apple-system,Segoe UI,Roboto,sans-serif';
+  ctx.fillText('baum.alejofig.com', PAD, H-PAD+22);
+
+  // Exporta
   canvas.toBlob(async blob=>{
     const file=new File([blob],`baum-lineup-dia${day}.png`,{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       try{await navigator.share({files:[file],title:'Mi lineup · Baum 11'});return;}
-      catch(e){/* cancelado: cae a descarga */}
+      catch(e){/* cancelado */}
     }
     downloadBlob(blob,file.name);
   },'image/png');
@@ -1460,9 +1535,9 @@ async function shareImage(){
 // --- Imagen PNG sólo con tu ruta de baile (itinerario) ---
 async function shareRouteImage(){
   const day=state.day;
-  const stops=routeTimes(day);
+  const stops=routeArtists(day);
   if(!stops.length){
-    alert('Tu ruta está vacía.\n\nActiva «🕒 Modo ruta», toca celdas de la grilla para marcar tu recorrido y vuelve a intentar.');
+    alert('Tu ruta está vacía.\n\nActiva «🕒 Modo ruta», toca los sets que quieres ver y vuelve a intentar.');
     return;
   }
   const canvas=document.createElement('canvas');
@@ -1473,15 +1548,17 @@ async function shareRouteImage(){
   const innerX=cardPad+circleR*2+10;          // texto a la derecha del círculo
   const innerW=cardW-innerX-cardPad;
 
-  // 1. Precalcula cada parada (artista(s) que tocan donde estarás)
+  // 1. Precalcula cada parada (un artista por parada)
   ctx.font=NAME_FONT;
-  const cards=stops.map((t,i)=>{
-    const stageId=state.route[day][t.key];
-    const arts=curList().filter(a=>a.slot&&a.slot.stage===stageId&&a.slot.time===t.key);
-    const txt=arts.length?arts.map(a=>a.name).join('   ·   '):'— sin artista asignado —';
-    const lines=wrapTextN(ctx,txt,innerW,4);
-    return {n:i+1,stage:STAGE_BY_ID[stageId],label:t.label,lines,
-            h:cardPad*2+circleR*2+4+lines.length*19};
+  const cards=stops.map((a,i)=>{
+    const lines=wrapTextN(ctx, a.name, innerW, 3);
+    return {
+      n:i+1,
+      stage:STAGE_BY_ID[a.stage],
+      label:`${a.start} – ${a.end}`,
+      lines,
+      h:cardPad*2+circleR*2+4+lines.length*19
+    };
   });
 
   // 2. Dimensiona el lienzo
@@ -1552,38 +1629,17 @@ async function shareRouteImage(){
 // --- Imagen vertical 9:16 para Instagram Stories ---
 async function shareStoriesImage(){
   const day = state.day;
-  const stops = routeTimes(day);
-  
-  // Si no hay ruta, usamos todos los artistas asignados en la grilla para ese día
-  let items = [];
-  if(stops.length) {
-    items = stops.map(t => {
-      const stageId = state.route[day][t.key];
-      const stage = STAGE_BY_ID[stageId];
-      const arts = curList().filter(a => a.slot && a.slot.stage === stageId && a.slot.time === t.key);
-      return {
-        time: t.label,
-        stage: stage,
-        artist: arts.length ? arts.map(a => a.name).join(' & ') : '—'
-      };
-    });
-  } else {
-    // Fallback: mostrar lo que haya en la grilla ordenado por tiempo
-    const assigned = curList().filter(a => a.slot).sort((a,b) => {
-      const ta = TIMES.findIndex(t => t.key === a.slot.time);
-      const tb = TIMES.findIndex(t => t.key === b.slot.time);
-      return ta - tb;
-    });
-    if(!assigned.length) {
-      alert('Tu itinerario está vacío. Agrega artistas a la grilla o marca tu ruta.');
-      return;
-    }
-    items = assigned.map(a => ({
-      time: TIMES.find(t => t.key === a.slot.time).label,
-      stage: STAGE_BY_ID[a.slot.stage],
-      artist: a.name
-    }));
+  const stops = routeArtists(day);
+
+  if(!stops.length){
+    alert('Tu ruta está vacía.\n\nActiva «🕒 Modo ruta» y toca los sets que quieres ver para llenarla.');
+    return;
   }
+  const items = stops.map(a => ({
+    time: `${a.start} – ${a.end}`,
+    stage: STAGE_BY_ID[a.stage],
+    artist: a.name
+  }));
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
